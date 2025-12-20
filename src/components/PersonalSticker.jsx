@@ -234,7 +234,7 @@ const PersonalSticker = ({ size = 300 }) => {
                 <polygon points={hexagonPoints(48, 50, 50)} />
               </clipPath>
               <image
-                href="/assets/avatar.jpeg"
+                href="/assets/avatar.png"
                 x="0"
                 y="0"
                 width="100"
