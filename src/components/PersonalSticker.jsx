@@ -221,7 +221,7 @@ const PersonalSticker = ({ size = 300 }) => {
               WebkitBackfaceVisibility: 'hidden'
             }}
           >
-            <svg viewBox="0 0 100 100" className="w-full h-full">
+            <svg width="100" height="100" viewBox="0 0 100 100" className="w-full h-full">
               {/* Regular hexagon */}
               <polygon
                 points={hexagonPoints(48, 50, 50)}
@@ -234,7 +234,7 @@ const PersonalSticker = ({ size = 300 }) => {
                 <polygon points={hexagonPoints(48, 50, 50)} />
               </clipPath>
               <image
-                href="/assets/avatar.png"
+                href="./assets/avatar.png"
                 x="0"
                 y="0"
                 width="100"
