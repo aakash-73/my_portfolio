@@ -1,6 +1,6 @@
 import React, { useMemo } from "react";
 import { motion } from "framer-motion";
-import { about, achievements } from "../data";
+import { about } from "../data";
 import GeometricBackground from "./GeometricBackground";
 
 const About = () => {
@@ -89,6 +89,7 @@ const About = () => {
       ))}
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        {/* Section header */}
         <motion.div
           className="text-center mb-16"
           initial={{ opacity: 0, y: 50 }}
@@ -107,36 +108,36 @@ const About = () => {
           </div>
         </motion.div>
 
-        <div className="grid md:grid-cols-2 gap-12 items-start mb-16">
-          <motion.div
-            initial={{ opacity: 0, x: -50 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-          >
-            <p className="text-gray-800 text-lg leading-relaxed mb-6 max-w-xl">
-              {about.summary}
-            </p>
+        {/* Centered content */}
+        <motion.div
+          className="max-w-3xl mx-auto mb-16"
+          initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+        >
+          <p className="text-gray-800 text-lg leading-relaxed mb-8 text-justify">
+            {about.summary}
+          </p>
 
-            <div className="space-y-4">
-              {about.highlights.map((highlight, index) => (
-                <motion.div
-                  key={index}
-                  className="flex items-start gap-3 group"
-                  initial={{ opacity: 0, x: -20 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.4, delay: index * 0.08 }}
-                >
-                  <div className="flex-shrink-0 w-6 h-6 border-2 border-red-500 bg-pale-green transform rotate-45 mt-1"></div>
-                  <p className="text-gray-700 group-hover:text-black transition-colors">
-                    {highlight}
-                  </p>
-                </motion.div>
-              ))}
-            </div>
-          </motion.div>
-        </div>
+          <div className="space-y-5">
+            {about.highlights.map((highlight, index) => (
+              <motion.div
+                key={index}
+                className="flex items-start gap-3"
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.4, delay: index * 0.08 }}
+              >
+                <div className="flex-shrink-0 w-6 h-6 border-2 border-red-500 bg-pale-green transform rotate-45 mt-1"></div>
+                <p className="text-gray-700 text-justify">
+                  {highlight}
+                </p>
+              </motion.div>
+            ))}
+          </div>
+        </motion.div>
       </div>
     </section>
   );
