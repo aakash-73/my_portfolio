@@ -25,48 +25,23 @@ export const about = {
 export const technicalSkills = [
   {
     category: "Languages",
-    skills: [
-      { name: "Python", level: 90 },
-      { name: "JavaScript", level: 85 },
-      { name: "Kotlin", level: 80 },
-      { name: "Java", level: 80 },
-      { name: "SQL", level: 85 },
-      { name: "C++", level: 75 }
-    ]
+    skills: ["Python", "JavaScript", "Kotlin", "Java", "SQL", "C++"]
   },
   {
     category: "Frontend",
-    skills: [
-      { name: "React.js", level: 90 },
-      { name: "Tailwind CSS", level: 85 },
-      { name: "Jetpack Compose", level: 80 }
-    ]
+    skills: ["React.js", "Tailwind CSS", "Jetpack Compose"]
   },
   {
     category: "Backend & Cloud",
-    skills: [
-      { name: "Flask", level: 80 },
-      { name: "AWS", level: 85 },
-      { name: "Docker", level: 75 },
-      { name: "REST APIs", level: 90 }
-    ]
+    skills: ["Flask", "AWS", "Docker", "REST APIs"]
   },
   {
     category: "AI/ML",
-    skills: [
-      { name: "PyTorch", level: 85 },
-      { name: "HuggingFace", level: 80 },
-      { name: "RAG Systems", level: 85 },
-      { name: "Generative AI", level: 80 }
-    ]
+    skills: ["PyTorch", "HuggingFace", "RAG Systems", "Generative AI"]
   },
   {
     category: "Databases",
-    skills: [
-      { name: "MongoDB", level: 85 },
-      { name: "MySQL", level: 80 },
-      { name: "Firebase", level: 80 }
-    ]
+    skills: ["MongoDB", "MySQL", "Firebase"]
   }
 ];
 
