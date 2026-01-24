@@ -11,16 +11,17 @@ export const personalInfo = {
 };
 
 export const about = {
-  summary: `Innovative Full Stack Developer and Machine Learning Engineer with a strong foundation in building scalable, intelligent applications. Graduated with a Master's in Computer Science at the University of Central Oklahoma (GPA: 3.72), I specialize in developing modern web applications, machine learning pipelines, and cloud-native solutions.`,
+  summary: `I’m a Full Stack Developer and ML Engineer focused on building reliable, user-friendly products end-to-end. I recently completed my M.S. in Computer Science at the University of Central Oklahoma (GPA: 3.72). My work spans modern web development, serverless cloud systems on AWS, and applied AI, especially retrieval-augmented generation (RAG) and computer vision, where I care as much about clean architecture and performance as I do about shipping features.`,
 
   highlights: [
-    "Expert in full-stack development with React.js, Python, and modern cloud technologies",
-    "Proven track record of improving application performance by up to 30%",
-    "Specialized in ML/AI integration, RAG systems, and computer vision applications",
-    "Strong advocate for clean architecture, scalable design patterns, and Agile methodologies",
-    "Passionate about creating intuitive user experiences backed by robust backend systems"
+    "Full-stack development with React.js + Python, building production-ready UIs and APIs",
+    "Cloud-native experience with AWS (serverless workflows, authentication, storage, and data pipelines)",
+    "Applied AI: RAG-based assistants, semantic search, and computer vision use cases",
+    "Engineering-first mindset: clean architecture, maintainable code, and measurable performance improvements",
+    "Collaborative in Agile teams,comfortable owning features from design to deployment"
   ]
 };
+
 
 export const technicalSkills = [
   {
@@ -159,33 +160,12 @@ export const education = [
     institution: "University of Central Oklahoma",
     location: "Edmond, OK",
     period: "Aug 2023 – May 2025",
-    gpa: "3.72",
+    gpa: "3.72 / 4.00",
     highlights: [
-      "Focus on Machine Learning and Software Engineering",
-      "Advanced coursework in AI, Cloud Computing, and System Design"
+      "Graduate coursework in Algorithms, Software Engineering, Cloud Computing, Database Systems, Mobile Application Development, and Theory of Computing",
+      "Completed advanced courses including Software Engineering I & II, Cloud Web Applications Development, Applications Database Systems, and Mobile Apps Programming",
+      "Awarded President’s Honor Roll (Spring 2024)",
+      "Completed coursework in Cyber Infrastructure & Cloud Computing and Enterprise Web Programming"
     ]
-  }
-];
-
-export const achievements = [
-  {
-    metric: "25%",
-    label: "Performance Boost",
-    description: "Carousel optimization"
-  },
-  {
-    metric: "70%",
-    label: "Workload Cut",
-    description: "Automated verification"
-  },
-  {
-    metric: "50%",
-    label: "Access Improved",
-    description: "RAG chatbot"
-  },
-  {
-    metric: "5+",
-    label: "Major Projects",
-    description: "AI to Cloud Native"
   }
 ];
