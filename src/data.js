@@ -12,7 +12,7 @@ export const personalInfo = {
 
 export const about = {
   summary: `Innovative Full Stack Developer and Machine Learning Engineer with a strong foundation in building scalable, intelligent applications. Graduated with a Master's in Computer Science at the University of Central Oklahoma (GPA: 3.72), I specialize in developing modern web applications, machine learning pipelines, and cloud-native solutions.`,
-  
+
   highlights: [
     "Expert in full-stack development with React.js, Python, and modern cloud technologies",
     "Proven track record of improving application performance by up to 30%",
@@ -86,13 +86,13 @@ export const experience = [
     period: "Aug 2025 – Present",
     location: "USA",
     achievements: [
-      "Improved Carousel performance by 25% and redesigned Request Filter UI, boosting filtering efficiency by 30%",
-      "Developed Profile Screen, Header UI, file upload, and audio recording/playback features",
-      "Synced user country data across platforms using AWS Cognito",
-      "Delivered multilingual support for core authentication and onboarding screens",
-      "Collaborated in a cross-functional Agile team of 5"
+      "Improved carousel runtime performance by 25% through rendering optimizations and state updates, and revamped the Request Filter UI to reduce time-to-filter by ~30%",
+      "Built key product surfaces including Profile screen and Header UI, plus file upload and audio recording/playback workflows end-to-end",
+      "Implemented consistent country sync across web/mobile by integrating AWS Cognito user attributes and standardizing the data flow across clients",
+      "Shipped multilingual support (i18n) for authentication and onboarding flows, including UI copy consistency and edge-case handling",
+      "Worked in a cross-functional Agile team of 5, collaborating closely with design and QA to deliver iterative releases"
     ],
-    technologies: ["React.js", "AWS Cognito", "REST APIs", "Agile"]
+    technologies: ["React.js", "AWS Cognito", "REST APIs", "i18n", "Agile"]
   },
   {
     id: 2,
@@ -101,76 +101,82 @@ export const experience = [
     period: "May 2020 – Jul 2020",
     location: "India",
     achievements: [
-      "Built supervised and unsupervised ML models for business workflows",
-      "Optimized preprocessing and model pipelines, improving efficiency by 20%",
-      "Enhanced feature engineering and documentation for reproducible deployment"
+      "Developed supervised and unsupervised ML models to support business workflows, from data preparation to evaluation",
+      "Optimized preprocessing and training pipelines (feature cleaning, transformations, and batching), improving end-to-end run efficiency by ~20%",
+      "Improved feature engineering practices and documentation to support reproducibility and smoother handoff for deployment"
     ],
-    technologies: ["Python", "Machine Learning", "Data Processing"]
+    technologies: ["Python", "Machine Learning", "Data Processing", "Feature Engineering"]
   }
 ];
+
 
 export const projects = [
   {
     id: 1,
     title: "WorldSketch: Vision-Language Diffusion Playground",
-    description: "Designed a modular image-generation platform using SDXL diffusion models optimized with JAX and PyTorch for fast, high-quality inference.",
+    description:
+      "Built a modular diffusion playground for SDXL-style image generation, focused on fast iteration across pipelines, configs, and inference backends (JAX/PyTorch).",
     technologies: ["Python", "PyTorch", "JAX", "Gradio", "SDXL", "Diffusion Models"],
     highlights: [
-      "Modular architecture for model experimentation",
-      "Optimized inference pipeline for high-quality generation",
-      "Interactive benchmarking interface"
+      "Designed a plug-in style architecture to swap models, schedulers, and guidance settings without rewriting core logic",
+      "Implemented an inference pipeline with reproducible configs (seeds, prompts, steps) to compare quality and latency across runs",
+      "Created an interactive Gradio UI with benchmarking hooks to track generation time and output consistency"
     ],
     category: "AI/ML"
   },
   {
     id: 2,
     title: "Serverless Participation Verification System",
-    description: "Developed a fully serverless AWS workflow for automated participation verification using Lambda, Rekognition, and Textract. Improved reliability and reduced manual verification workload by 70%.",
+    description:
+      "End-to-end serverless workflow that verifies participation by extracting names (Textract) and matching faces (Rekognition), storing results in DynamoDB for auditability.",
     technologies: ["AWS Lambda", "AWS Rekognition", "AWS Textract", "CDK", "DynamoDB", "React", "Amplify"],
     highlights: [
-      "Fully serverless architecture with AWS CDK",
-      "70% reduction in manual verification workload",
-      "Optimized cold-start behavior and secure IAM roles"
+      "Provisioned infrastructure with AWS CDK (Lambda, S3, DynamoDB, API Gateway/Amplify) for repeatable deployments",
+      "Built a verification pipeline combining OCR + face similarity matching, with structured results persisted for review and reporting",
+      "Hardened the system with least-privilege IAM roles, input validation, and optimized cold-start paths for faster responses"
     ],
     category: "Cloud/Full Stack"
   },
   {
     id: 3,
     title: "Attendance Management System",
-    description: "Built an Android attendance app with Jetpack Compose and MongoDB using an offline-first architecture for seamless synchronization.",
-    technologies: ["Kotlin", "Jetpack Compose", "MongoDB", "Dagger Hilt", "MVVM"],
+    description:
+      "Offline-first Android app to manage subjects, student rosters, and attendance history with local-first persistence and optional MongoDB sync.",
+    technologies: ["Kotlin", "Jetpack Compose", "Room", "MongoDB", "Dagger Hilt", "MVVM"],
     highlights: [
-      "Offline-first architecture for reliable syncing",
-      "MVVM pattern with Dagger Hilt",
-      "40% improvement in tracking efficiency"
+      "Offline-first architecture using local storage as the source of truth to keep the app reliable without connectivity",
+      "Structured MVVM + Repository layers with Hilt dependency injection for maintainable and testable feature growth",
     ],
     category: "Mobile"
   },
   {
     id: 4,
     title: "Syllabus Chatbot (RAG)",
-    description: "Developed a Retrieval-Augmented Generation chatbot for answering syllabus-related queries with contextual accuracy.",
+    description:
+      "RAG-based chatbot that answers syllabus questions using semantic retrieval over course documents and grounded responses.",
     technologies: ["Python", "RAG", "React.js", "MongoDB", "Semantic Search"],
     highlights: [
-      "RAG pipeline with semantic search",
-      "50% improvement in information accessibility",
-      "Interactive React frontend"
+      "Built a retrieval pipeline with chunking + embeddings to fetch relevant syllabus sections before generation",
+      "Improved answer grounding by returning citations/snippets from the source context used for the response",
+      "Developed a responsive React UI with conversation history and feedback-friendly interaction"
     ],
     category: "AI/ML"
   },
   {
     id: 5,
     title: "Schedule Management System",
-    description: "Created a task scheduling application with automated email reminders, priority-based organization, and real-time status tracking.",
+    description:
+      "Task scheduling web app with prioritization, status tracking, and automated reminder notifications to support consistent follow-through.",
     technologies: ["HTML", "CSS", "JavaScript", "Firebase"],
     highlights: [
-      "Automated email reminder system",
-      "Priority-based task organization",
-      "35% improvement in completion rates"
+      "Implemented prioritized task workflows with real-time status updates and filtering for faster planning",
+      "Integrated automated reminders/notifications (Firebase-based) to reduce missed deadlines",
+      "Designed a clean UI for quick task entry, editing, and completion tracking"
     ],
     category: "Web Application"
   }
 ];
+
 
 export const education = [
   {
