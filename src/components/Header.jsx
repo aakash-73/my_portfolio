@@ -1,37 +1,162 @@
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, useAnimationControls } from 'framer-motion';
 import { FaGithub, FaLinkedin, FaEnvelope, FaChevronDown } from 'react-icons/fa';
 import { personalInfo } from '../data';
 import PersonalSticker from './PersonalSticker';
-import GeometricBackground from "./GeometricBackground";
+import GeometricBackground from './GeometricBackground';
 
 const Header = () => {
   const [scrolled, setScrolled] = useState(false);
+  const [atTop, setAtTop] = useState(true);
+  const [introDone, setIntroDone] = useState(false);
+
+  // Sequencing controls
+  const bgControls = useAnimationControls();
+  const stickerControls = useAnimationControls();
+  const contentControls = useAnimationControls();
 
   useEffect(() => {
     const handleScroll = () => {
-      setScrolled(window.scrollY > 50);
+      const y = window.scrollY;
+
+      setScrolled(y > 50);
+      setAtTop(y === 0);
     };
-    window.addEventListener('scroll', handleScroll);
+
+    handleScroll(); // init
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   const scrollToSection = (sectionId) => {
     const element = document.getElementById(sectionId);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
-    }
+    if (element) element.scrollIntoView({ behavior: 'smooth' });
   };
+
+  // Intro sequence (runs once)
+  useEffect(() => {
+    const runSequence = async () => {
+      await bgControls.start('build');
+      await bgControls.start('spread');
+
+      await stickerControls.start('buildCenter');
+
+      // Default header state after intro: sticker left + content visible
+      bgControls.start('dockLeft');
+      stickerControls.start('dockLeft');
+      contentControls.start('revealFromBehindSticker');
+
+      setIntroDone(true);
+    };
+
+    runSequence();
+  }, [bgControls, stickerControls, contentControls]);
+
+  /**
+   * Scroll interaction (AFTER intro):
+   * - If NOT at top (any scrollY > 0): sticker stays CENTER and content stays hidden behind it
+   * - ONLY when completely at top (scrollY === 0): sticker moves LEFT and content reveals from behind it
+   */
+  useEffect(() => {
+    if (!introDone) return;
+
+    if (!atTop) {
+      // Any amount of scroll down OR scrolling back up but not fully at top
+      stickerControls.start('center');
+      contentControls.start('hideBehindSticker');
+    } else {
+      // Fully at top -> now move sticker left AND reveal content from behind
+      stickerControls.start('dockLeft');
+      contentControls.start('revealFromBehindSticker');
+    }
+  }, [atTop, introDone, stickerControls, contentControls]);
+
+  // ---------------- Variants ----------------
+
+  const bgPanelVariants = {
+    initial: { opacity: 0, scale: 0.92, x: 0, filter: 'blur(6px)' },
+    build: {
+      opacity: 1,
+      scale: 1,
+      filter: 'blur(0px)',
+      transition: { duration: 1.0, ease: 'easeOut' },
+    },
+    spread: {
+      scale: [1, 1.03, 1],
+      transition: { duration: 1.1, ease: 'easeInOut' },
+    },
+    dockLeft: {
+      x: '-26vw',
+      scale: 0.95,
+      transition: { duration: 1.1, ease: 'easeInOut' },
+    },
+  };
+
+  const stickerVariants = {
+    initial: { opacity: 0, scale: 0.85, y: 14, x: 0 },
+
+    buildCenter: {
+      opacity: 1,
+      scale: 1,
+      y: 0,
+      x: 0,
+      transition: { duration: 0.8, ease: 'easeOut' },
+    },
+
+    dockLeft: {
+      x: '-28vw',
+      scale: 0.85,
+      transition: { duration: 0.95, ease: 'easeInOut' },
+    },
+
+    // Center state on scroll (and can be larger if you want)
+    center: {
+      x: 0,
+      scale: 1.1,
+      transition: { duration: 0.95, ease: 'easeInOut' },
+    },
+  };
+
+  // Content: slides behind sticker + hides, then reveals from behind when sticker moves left
+  const contentGroupVariants = {
+    revealFromBehindSticker: {
+      x: 0,
+      opacity: 1,
+      transition: { duration: 0.9, ease: 'easeInOut' },
+    },
+    hideBehindSticker: {
+      x: -140,
+      opacity: 0.98,
+      transition: { duration: 0.9, ease: 'easeInOut' },
+    },
+  };
+
+  const contentInnerVariants = {
+    initial: { opacity: 0, y: 6 },
+    revealFromBehindSticker: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.7, ease: 'easeOut', delay: 0.1 },
+    },
+    hideBehindSticker: {
+      opacity: 0,
+      y: 6,
+      transition: { duration: 0.45, ease: 'easeIn' },
+    },
+  };
+
+  // ---------------- Render ----------------
 
   return (
     <>
       {/* Navigation Bar */}
-      <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        scrolled ? 'bg-black border-b-2 border-pale-green shadow-lg' : 'bg-transparent'
-      }`}>
+      <nav
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? 'bg-black border-b-2 border-pale-green shadow-lg' : 'bg-transparent'
+          }`}
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <motion.button 
+            <motion.button
               onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
               className="text-2xl font-black text-white hover:text-pale-green transition-colors"
               whileHover={{ scale: 1.1 }}
@@ -41,7 +166,7 @@ const Header = () => {
               AN
               <span className="text-red-500">{'/>'}</span>
             </motion.button>
-            
+
             <div className="hidden md:flex space-x-8">
               {['about', 'experience', 'projects', 'skills', 'education', 'contact'].map((section) => (
                 <button
@@ -56,18 +181,18 @@ const Header = () => {
             </div>
 
             <div className="flex space-x-4">
-              <motion.a 
-                href={personalInfo.github} 
-                target="_blank" 
-                rel="noopener noreferrer" 
+              <motion.a
+                href={personalInfo.github}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="text-white hover:text-pale-green transition-colors"
                 whileHover={{ scale: 1.2, rotate: 5 }}
               >
                 <FaGithub size={20} />
               </motion.a>
-              <motion.a 
-                href={personalInfo.linkedin} 
-                target="_blank" 
+              <motion.a
+                href={personalInfo.linkedin}
+                target="_blank"
                 rel="noopener noreferrer"
                 className="text-white hover:text-pale-green transition-colors"
                 whileHover={{ scale: 1.2, rotate: -5 }}
@@ -80,95 +205,151 @@ const Header = () => {
       </nav>
 
       {/* Hero Section */}
-      <header className="relative min-h-screen flex items-center justify-center overflow-hidden bg-black">
-        {/* Geometric Background Pattern */}
-        <GeometricBackground variant="dark" />
+      <header className="relative min-h-screen overflow-hidden bg-black flex items-center">
+        {/* Base background */}
+        <div className="absolute inset-0 z-0">
+          <GeometricBackground variant="dark" />
+        </div>
 
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid md:grid-cols-2 gap-12 items-center">
-            {/* Left Side - Sticker */}
-            <motion.div
-              className="flex justify-center"
-              initial={{ opacity: 0, x: -100 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 1 }}
-            >
-              <PersonalSticker size={600} />
-            </motion.div>
+        {/* Content layer (below sticker but above base bg) */}
+        <div className="relative z-10 w-full">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="relative overflow-hidden">
+              <motion.div
+                className="relative"
+                variants={contentGroupVariants}
+                initial="hideBehindSticker"
+                animate={contentControls}
+              >
+                <div className="grid md:grid-cols-2 gap-12 items-center">
+                  <div className="hidden md:block" />
 
-            {/* Right Side - Info */}
-            <motion.div
-              initial={{ opacity: 0, x: 100 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 1, delay: 0.3 }}
-            >
-              
-              <h1 className="text-5xl md:text-7xl font-black mb-4">
-                <span className="text-white">{personalInfo.name.split(' ')[0]}</span>
-                <br />
-                <span className="text-red-500">{personalInfo.name.split(' ').slice(1).join(' ')}</span>
-              </h1>
-              
-              <div className="space-y-2 mb-6">
-                <p className="text-2xl md:text-3xl text-pale-green font-bold tracking-wide">
-                  {'<'} {personalInfo.title} {' />'}
-                </p>
-                <p className="text-xl md:text-2xl text-white font-light">
-                  {personalInfo.subtitle}
-                </p>
-              </div>
-              
-              <p className="text-lg text-gray-400 mb-8 max-w-xl">
-                {personalInfo.tagline}
-              </p>
-
-              <div className="flex flex-wrap gap-4 mb-8">
-                <motion.a 
-                  href={`mailto:${personalInfo.email}`}
-                  className="px-8 py-4 bg-red-500 text-white font-bold uppercase tracking-wider hover:bg-red-600 transition-colors relative overflow-hidden group"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <span className="relative z-10 flex items-center gap-2">
-                    <FaEnvelope /> Get In Touch
-                  </span>
                   <motion.div
-                    className="absolute inset-0 bg-pale-green"
-                    initial={{ x: '-100%' }}
-                    whileHover={{ x: 0 }}
-                    transition={{ duration: 0.3 }}
-                  />
-                </motion.a>
-                
-                <motion.button
-                  onClick={() => scrollToSection('projects')}
-                  className="px-8 py-4 border-2 border-white text-white font-bold uppercase tracking-wider hover:bg-white hover:text-black transition-all"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  View Projects
-                </motion.button>
-              </div>
+                    variants={contentInnerVariants}
+                    initial="initial"
+                    animate={contentControls}
+                    className="relative"
+                  >
+                    <h1 className="text-5xl md:text-7xl font-black mb-4">
+                      <span className="text-white">
+                        {personalInfo.name.split(' ').slice(0, 2).join(' ')}
+                      </span>
+                      <br />
+                      <span className="text-red-500">
+                        {personalInfo.name.split(' ').slice(2).join(' ')}
+                      </span>
+                    </h1>
 
-              <div className="flex flex-wrap gap-6 text-gray-400">
-                <a href={`mailto:${personalInfo.email}`} className="flex items-center gap-2 hover:text-pale-green transition-colors">
-                  <FaEnvelope /> {personalInfo.email}
-                </a>
-              </div>
-            </motion.div>
+                    <div className="space-y-2 mb-6">
+                      <p className="text-2xl md:text-3xl text-pale-green font-bold tracking-wide">
+                        {'<'} {personalInfo.title} {' />'}
+                      </p>
+                      <p className="text-xl md:text-2xl text-white font-light">
+                        {personalInfo.subtitle}
+                      </p>
+                    </div>
+
+                    <p className="text-lg text-gray-400 mb-8 max-w-xl">{personalInfo.tagline}</p>
+
+                    <div className="flex flex-wrap gap-4 mb-8">
+                      <motion.a
+                        href={`mailto:${personalInfo.email}`}
+                        className="px-8 py-4 bg-red-500 text-white font-bold uppercase tracking-wider hover:bg-red-600 transition-colors relative overflow-hidden group"
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                      >
+                        <span className="relative z-10 flex items-center gap-2">
+                          <FaEnvelope /> Get In Touch
+                        </span>
+                        <motion.div
+                          className="absolute inset-0 bg-pale-green"
+                          initial={{ x: '-100%' }}
+                          whileHover={{ x: 0 }}
+                          transition={{ duration: 0.3 }}
+                        />
+                      </motion.a>
+
+                      <motion.button
+                        onClick={() => scrollToSection('projects')}
+                        className="px-8 py-4 border-2 border-white text-white font-bold uppercase tracking-wider hover:bg-white hover:text-black transition-all"
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                      >
+                        View Projects
+                      </motion.button>
+                    </div>
+
+                    <div className="flex flex-wrap gap-6 text-gray-400">
+                      <a
+                        href={`mailto:${personalInfo.email}`}
+                        className="flex items-center gap-2 hover:text-pale-green transition-colors"
+                      >
+                        <FaEnvelope /> {personalInfo.email}
+                      </a>
+                    </div>
+                  </motion.div>
+                </div>
+              </motion.div>
+
+              {/* Sticker mask (moves exactly with sticker) */}
+              {/* Transparent Mask Layer */}
+              <motion.div
+                className="absolute inset-0 z-20 pointer-events-none"
+                variants={{
+                  dockLeft: { x: '-28vw' },
+                  center: { x: 0 },
+                  buildCenter: { x: 0 },
+                  initial: { x: 0 },
+                }}
+                initial="initial"
+                animate={stickerControls}
+                transition={{ duration: 0.95, ease: 'easeInOut' }}
+                style={{
+                  WebkitMaskImage: 'radial-gradient(circle 310px at center, transparent 99%, black 100%)',
+                  maskImage: 'radial-gradient(circle 310px at center, transparent 99%, black 100%)',
+                  WebkitMaskRepeat: 'no-repeat',
+                  maskRepeat: 'no-repeat',
+                  WebkitMaskPosition: 'center',
+                  maskPosition: 'center',
+                }}
+              />
+            </div>
           </div>
+        </div>
 
-        </div>
-        <div>
-          <motion.button
-            onClick={() => scrollToSection('about')}
-            className="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-pale-green"
-            animate={{ y: [0, 10, 0] }}
-            transition={{ duration: 2, repeat: Infinity }}
-          >
-            <FaChevronDown size={32} />
-          </motion.button>
-        </div>
+        {/* Center panel BG build/spread -> dock left */}
+        <motion.div
+          className="absolute inset-0 z-30 flex items-center justify-center pointer-events-none"
+          variants={bgPanelVariants}
+          initial="initial"
+          animate={bgControls}
+        >
+          <div className="relative w-[92vw] h-[92vh] md:w-[75vw] md:h-[82vh] rounded-3xl overflow-hidden">
+          </div>
+        </motion.div>
+
+        {/* Sticker top layer */}
+        <motion.div
+          className="absolute inset-0 z-40 flex items-center justify-center pointer-events-none"
+          variants={stickerVariants}
+          initial="initial"
+          animate={stickerControls}
+          style={{ transformOrigin: 'center center' }}
+        >
+          <div className="pointer-events-auto">
+            <PersonalSticker size={600} />
+          </div>
+        </motion.div>
+
+        {/* Scroll Down */}
+        <motion.button
+          onClick={() => scrollToSection('about')}
+          className="absolute bottom-8 left-1/2 -translate-x-1/2 text-pale-green z-50"
+          animate={{ y: [0, 10, 0] }}
+          transition={{ duration: 2, repeat: Infinity }}
+        >
+          <FaChevronDown size={32} />
+        </motion.button>
       </header>
     </>
   );
