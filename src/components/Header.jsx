@@ -33,15 +33,20 @@ const Header = () => {
     if (element) element.scrollIntoView({ behavior: 'smooth' });
   };
 
-  // Intro sequence (runs once)
+  // Enhanced intro sequence with sticker build time
   useEffect(() => {
     const runSequence = async () => {
+      // Step 1: Build background
       await bgControls.start('build');
       await bgControls.start('spread');
 
+      // Step 2: Build sticker at center (wait for sticker to complete its 3s build animation)
       await stickerControls.start('buildCenter');
+      
+      // Give the sticker animation time to complete (3.3 seconds total for all 8 steps)
+      await new Promise(resolve => setTimeout(resolve, 3300));
 
-      // Default header state after intro: sticker left + content visible
+      // Step 3: After sticker is fully built, dock everything left and reveal content
       bgControls.start('dockLeft');
       stickerControls.start('dockLeft');
       contentControls.start('revealFromBehindSticker');
@@ -88,7 +93,7 @@ const Header = () => {
     dockLeft: {
       x: '-26vw',
       scale: 0.95,
-      transition: { duration: 1.1, ease: 'easeInOut' },
+      transition: { duration: 1.2, ease: [0.34, 1.56, 0.64, 1] }, // Enhanced easing
     },
   };
 
@@ -106,14 +111,20 @@ const Header = () => {
     dockLeft: {
       x: '-28vw',
       scale: 0.85,
-      transition: { duration: 0.95, ease: 'easeInOut' },
+      transition: { 
+        duration: 1.2, 
+        ease: [0.34, 1.56, 0.64, 1], // Bouncy easing to match sticker animations
+      },
     },
 
-    // Center state on scroll (and can be larger if you want)
+    // Center state on scroll (larger and more dramatic)
     center: {
       x: 0,
-      scale: 1.1,
-      transition: { duration: 0.95, ease: 'easeInOut' },
+      scale: 1.15, // Slightly larger when centered
+      transition: { 
+        duration: 1.0, 
+        ease: [0.34, 1.56, 0.64, 1],
+      },
     },
   };
 
@@ -122,12 +133,19 @@ const Header = () => {
     revealFromBehindSticker: {
       x: 0,
       opacity: 1,
-      transition: { duration: 0.9, ease: 'easeInOut' },
+      transition: { 
+        duration: 1.0, 
+        ease: [0.19, 1, 0.22, 1], // Smooth reveal
+        delay: 0.2, // Slight delay for dramatic effect
+      },
     },
     hideBehindSticker: {
       x: -140,
       opacity: 0.98,
-      transition: { duration: 0.9, ease: 'easeInOut' },
+      transition: { 
+        duration: 0.8, 
+        ease: [0.19, 1, 0.22, 1],
+      },
     },
   };
 
@@ -136,7 +154,11 @@ const Header = () => {
     revealFromBehindSticker: {
       opacity: 1,
       y: 0,
-      transition: { duration: 0.7, ease: 'easeOut', delay: 0.1 },
+      transition: { 
+        duration: 0.8, 
+        ease: 'easeOut', 
+        delay: 0.4, // Cascade after group movement
+      },
     },
     hideBehindSticker: {
       opacity: 0,
@@ -151,8 +173,9 @@ const Header = () => {
     <>
       {/* Navigation Bar */}
       <nav
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? 'bg-black border-b-2 border-pale-green shadow-lg' : 'bg-transparent'
-          }`}
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+          scrolled ? 'bg-black border-b-2 border-pale-green shadow-lg' : 'bg-transparent'
+        }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
@@ -230,7 +253,12 @@ const Header = () => {
                     animate={contentControls}
                     className="relative"
                   >
-                    <h1 className="text-5xl md:text-7xl font-black mb-4">
+                    <motion.h1 
+                      className="text-5xl md:text-7xl font-black mb-4"
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 4.8, duration: 0.8 }}
+                    >
                       <span className="text-white">
                         {personalInfo.name.split(' ').slice(0, 2).join(' ')}
                       </span>
@@ -238,20 +266,37 @@ const Header = () => {
                       <span className="text-red-500">
                         {personalInfo.name.split(' ').slice(2).join(' ')}
                       </span>
-                    </h1>
+                    </motion.h1>
 
-                    <div className="space-y-2 mb-6">
+                    <motion.div 
+                      className="space-y-2 mb-6"
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 5.0, duration: 0.8 }}
+                    >
                       <p className="text-2xl md:text-3xl text-pale-green font-bold tracking-wide">
                         {'<'} {personalInfo.title} {' />'}
                       </p>
                       <p className="text-xl md:text-2xl text-white font-light">
                         {personalInfo.subtitle}
                       </p>
-                    </div>
+                    </motion.div>
 
-                    <p className="text-lg text-gray-400 mb-8 max-w-xl">{personalInfo.tagline}</p>
+                    <motion.p 
+                      className="text-lg text-gray-400 mb-8 max-w-xl"
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 5.2, duration: 0.8 }}
+                    >
+                      {personalInfo.tagline}
+                    </motion.p>
 
-                    <div className="flex flex-wrap gap-4 mb-8">
+                    <motion.div 
+                      className="flex flex-wrap gap-4 mb-8"
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 5.4, duration: 0.8 }}
+                    >
                       <motion.a
                         href={`mailto:${personalInfo.email}`}
                         className="px-8 py-4 bg-red-500 text-white font-bold uppercase tracking-wider hover:bg-red-600 transition-colors relative overflow-hidden group"
@@ -277,16 +322,21 @@ const Header = () => {
                       >
                         View Projects
                       </motion.button>
-                    </div>
+                    </motion.div>
 
-                    <div className="flex flex-wrap gap-6 text-gray-400">
+                    <motion.div 
+                      className="flex flex-wrap gap-6 text-gray-400"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 5.6, duration: 0.8 }}
+                    >
                       <a
                         href={`mailto:${personalInfo.email}`}
                         className="flex items-center gap-2 hover:text-pale-green transition-colors"
                       >
                         <FaEnvelope /> {personalInfo.email}
                       </a>
-                    </div>
+                    </motion.div>
                   </motion.div>
                 </div>
               </motion.div>
@@ -303,7 +353,7 @@ const Header = () => {
                 }}
                 initial="initial"
                 animate={stickerControls}
-                transition={{ duration: 0.95, ease: 'easeInOut' }}
+                transition={{ duration: 1.2, ease: [0.34, 1.56, 0.64, 1] }}
                 style={{
                   WebkitMaskImage: 'radial-gradient(circle 310px at center, transparent 99%, black 100%)',
                   maskImage: 'radial-gradient(circle 310px at center, transparent 99%, black 100%)',
@@ -341,12 +391,19 @@ const Header = () => {
           </div>
         </motion.div>
 
-        {/* Scroll Down */}
+        {/* Scroll Down Indicator - appears after intro */}
         <motion.button
           onClick={() => scrollToSection('about')}
           className="absolute bottom-8 left-1/2 -translate-x-1/2 text-pale-green z-50"
-          animate={{ y: [0, 10, 0] }}
-          transition={{ duration: 2, repeat: Infinity }}
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ 
+            opacity: introDone ? 1 : 0,
+            y: introDone ? [0, 10, 0] : -20
+          }}
+          transition={{ 
+            opacity: { delay: 5.8, duration: 0.5 },
+            y: { duration: 2, repeat: Infinity, delay: 5.8 }
+          }}
         >
           <FaChevronDown size={32} />
         </motion.button>
