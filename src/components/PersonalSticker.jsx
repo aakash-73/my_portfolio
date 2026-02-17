@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, useSpring, useTransform } from 'framer-motion';
+import profilePic from '../assets/profilePic.png';
 
 const PersonalSticker = ({ size = 300 }) => {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
@@ -277,7 +278,7 @@ const PersonalSticker = ({ size = 300 }) => {
                 />
 
                 <image
-                  href="./assets/profilePic.png"
+                  href={profilePic}
                   x="-5"
                   y="-5"
                   width="110"
