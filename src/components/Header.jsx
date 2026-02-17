@@ -9,7 +9,7 @@ const Header = () => {
   const [scrolled, setScrolled] = useState(false);
   const [atTop, setAtTop] = useState(true);
   const [introDone, setIntroDone] = useState(false);
-
+  const [showMailPopup, setShowMailPopup] = useState(false);
   // Sequencing controls
   const bgControls = useAnimationControls();
   const stickerControls = useAnimationControls();
@@ -33,6 +33,28 @@ const Header = () => {
     if (element) element.scrollIntoView({ behavior: 'smooth' });
   };
 
+  const handleMailChoice = (type) => {
+    const subject = encodeURIComponent("Portfolio Contact");
+    const body = encodeURIComponent("Hi,\n\n");
+
+    const mailtoLink = `mailto:${personalInfo.email}?subject=${subject}&body=${body}`;
+    const gmailLink = `https://mail.google.com/mail/?view=cm&fs=1&to=${personalInfo.email}&su=${subject}&body=${body}`;
+    const outlookWebLink = `https://outlook.live.com/mail/0/deeplink/compose?to=${personalInfo.email}&subject=${subject}&body=${body}`;
+
+    switch (type) {
+      case "gmail":
+        window.open(gmailLink, "_blank");
+        break;
+      case "outlook-web":
+        window.open(outlookWebLink, "_blank");
+        break;
+      default:
+        window.location.href = mailtoLink;
+    }
+
+    setShowMailPopup(false);
+  };
+
   // Enhanced intro sequence with sticker build time
   useEffect(() => {
     const runSequence = async () => {
@@ -42,7 +64,7 @@ const Header = () => {
 
       // Step 2: Build sticker at center (wait for sticker to complete its 3s build animation)
       await stickerControls.start('buildCenter');
-      
+
       // Give the sticker animation time to complete (3.3 seconds total for all 8 steps)
       await new Promise(resolve => setTimeout(resolve, 3300));
 
@@ -111,8 +133,8 @@ const Header = () => {
     dockLeft: {
       x: '-28vw',
       scale: 0.85,
-      transition: { 
-        duration: 1.2, 
+      transition: {
+        duration: 1.2,
         ease: [0.34, 1.56, 0.64, 1], // Bouncy easing to match sticker animations
       },
     },
@@ -121,8 +143,8 @@ const Header = () => {
     center: {
       x: 0,
       scale: 1.15, // Slightly larger when centered
-      transition: { 
-        duration: 1.0, 
+      transition: {
+        duration: 1.0,
         ease: [0.34, 1.56, 0.64, 1],
       },
     },
@@ -133,8 +155,8 @@ const Header = () => {
     revealFromBehindSticker: {
       x: 0,
       opacity: 1,
-      transition: { 
-        duration: 1.0, 
+      transition: {
+        duration: 1.0,
         ease: [0.19, 1, 0.22, 1], // Smooth reveal
         delay: 0.2, // Slight delay for dramatic effect
       },
@@ -142,8 +164,8 @@ const Header = () => {
     hideBehindSticker: {
       x: -140,
       opacity: 0.98,
-      transition: { 
-        duration: 0.8, 
+      transition: {
+        duration: 0.8,
         ease: [0.19, 1, 0.22, 1],
       },
     },
@@ -154,9 +176,9 @@ const Header = () => {
     revealFromBehindSticker: {
       opacity: 1,
       y: 0,
-      transition: { 
-        duration: 0.8, 
-        ease: 'easeOut', 
+      transition: {
+        duration: 0.8,
+        ease: 'easeOut',
         delay: 0.4, // Cascade after group movement
       },
     },
@@ -173,9 +195,8 @@ const Header = () => {
     <>
       {/* Navigation Bar */}
       <nav
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-          scrolled ? 'bg-black border-b-2 border-pale-green shadow-lg' : 'bg-transparent'
-        }`}
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? 'bg-black border-b-2 border-pale-green shadow-lg' : 'bg-transparent'
+          }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
@@ -253,7 +274,7 @@ const Header = () => {
                     animate={contentControls}
                     className="relative"
                   >
-                    <motion.h1 
+                    <motion.h1
                       className="text-5xl md:text-7xl font-black mb-4"
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
@@ -268,7 +289,7 @@ const Header = () => {
                       </span>
                     </motion.h1>
 
-                    <motion.div 
+                    <motion.div
                       className="space-y-2 mb-6"
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
@@ -282,7 +303,7 @@ const Header = () => {
                       </p>
                     </motion.div>
 
-                    <motion.p 
+                    <motion.p
                       className="text-lg text-gray-400 mb-8 max-w-xl"
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
@@ -291,14 +312,14 @@ const Header = () => {
                       {personalInfo.tagline}
                     </motion.p>
 
-                    <motion.div 
+                    <motion.div
                       className="flex flex-wrap gap-4 mb-8"
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 5.4, duration: 0.8 }}
                     >
-                      <motion.a
-                        href={`mailto:${personalInfo.email}`}
+                      <motion.button
+                        onClick={() => setShowMailPopup(true)}
                         className="px-8 py-4 bg-red-500 text-white font-bold uppercase tracking-wider hover:bg-red-600 transition-colors relative overflow-hidden group"
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
@@ -312,8 +333,7 @@ const Header = () => {
                           whileHover={{ x: 0 }}
                           transition={{ duration: 0.3 }}
                         />
-                      </motion.a>
-
+                      </motion.button>
                       <motion.button
                         onClick={() => scrollToSection('projects')}
                         className="px-8 py-4 border-2 border-white text-white font-bold uppercase tracking-wider hover:bg-white hover:text-black transition-all"
@@ -324,7 +344,7 @@ const Header = () => {
                       </motion.button>
                     </motion.div>
 
-                    <motion.div 
+                    <motion.div
                       className="flex flex-wrap gap-6 text-gray-400"
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
@@ -396,17 +416,60 @@ const Header = () => {
           onClick={() => scrollToSection('about')}
           className="absolute bottom-8 left-1/2 -translate-x-1/2 text-pale-green z-50"
           initial={{ opacity: 0, y: -20 }}
-          animate={{ 
+          animate={{
             opacity: introDone ? 1 : 0,
             y: introDone ? [0, 10, 0] : -20
           }}
-          transition={{ 
+          transition={{
             opacity: { delay: 5.8, duration: 0.5 },
             y: { duration: 2, repeat: Infinity, delay: 5.8 }
           }}
         >
           <FaChevronDown size={32} />
         </motion.button>
+        {showMailPopup && (
+          <div className="fixed inset-0 bg-black bg-opacity-80 z-[100] flex items-center justify-center">
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              className="bg-black border-4 border-pale-green p-8 rounded-xl text-white w-[90%] max-w-md"
+            >
+              <h3 className="text-2xl font-bold mb-6 text-center">
+                Choose Email Method
+              </h3>
+
+              <div className="space-y-4">
+                <button
+                  onClick={() => handleMailChoice("default")}
+                  className="w-full py-3 border-2 border-white hover:bg-white hover:text-black transition-all"
+                >
+                  Default Mail App
+                </button>
+
+                <button
+                  onClick={() => handleMailChoice("gmail")}
+                  className="w-full py-3 border-2 border-white hover:bg-white hover:text-black transition-all"
+                >
+                  Gmail (Browser)
+                </button>
+
+                <button
+                  onClick={() => handleMailChoice("outlook-web")}
+                  className="w-full py-3 border-2 border-white hover:bg-white hover:text-black transition-all"
+                >
+                  Outlook Web
+                </button>
+
+                <button
+                  onClick={() => setShowMailPopup(false)}
+                  className="w-full py-3 text-gray-400 hover:text-white"
+                >
+                  Cancel
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
       </header>
     </>
   );
