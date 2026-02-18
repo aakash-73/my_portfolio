@@ -14,6 +14,7 @@ const Header = () => {
   const bgControls = useAnimationControls();
   const stickerControls = useAnimationControls();
   const contentControls = useAnimationControls();
+  const arrowControls = useAnimationControls();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -27,6 +28,26 @@ const Header = () => {
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  useEffect(() => {
+    if (!introDone) return;
+
+    if (atTop) {
+      // Sticker docked left → show arrow
+      arrowControls.start({
+        opacity: 1,
+        y: [0, 10, 0],
+        transition: { opacity: { duration: 0.6 }, y: { duration: 2, repeat: Infinity } },
+      });
+    } else {
+      // Sticker moves center → hide arrow
+      arrowControls.start({
+        opacity: 0,
+        y: -20,
+        transition: { duration: 0.5 },
+      });
+    }
+  }, [atTop, introDone, arrowControls]);
 
   const scrollToSection = (sectionId) => {
     const element = document.getElementById(sectionId);
@@ -407,26 +428,22 @@ const Header = () => {
           style={{ transformOrigin: 'center center' }}
         >
           <div className="pointer-events-auto">
-            <PersonalSticker size={600} />
+            <PersonalSticker size={650} />
           </div>
         </motion.div>
 
         {/* Scroll Down Indicator - appears after intro */}
         <motion.button
           onClick={() => scrollToSection('about')}
-          className="absolute bottom-8 left-1/2 -translate-x-1/2 text-pale-green z-50"
+          className="absolute left-1/2 bottom-8 text-pale-green"
+          style={{ zIndex: 50, translateX: '-50%' }}
           initial={{ opacity: 0, y: -20 }}
-          animate={{
-            opacity: introDone ? 1 : 0,
-            y: introDone ? [0, 10, 0] : -20
-          }}
-          transition={{
-            opacity: { delay: 5.8, duration: 0.5 },
-            y: { duration: 2, repeat: Infinity, delay: 5.8 }
-          }}
+          animate={arrowControls} // control via animation controls
         >
           <FaChevronDown size={32} />
         </motion.button>
+
+
         {showMailPopup && (
           <div className="fixed inset-0 bg-black bg-opacity-80 z-[100] flex items-center justify-center">
             <motion.div
