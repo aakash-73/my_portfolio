@@ -156,7 +156,7 @@ const Header = () => {
     dockLeft: {
       // On mobile, dock to the top instead of left
       x: window.innerWidth < 768 ? 0 : '-28vw',
-      y: window.innerWidth < 768 ? '-32dvh' : 0, 
+      y: window.innerWidth < 768 ? '-36dvh' : 0, 
       scale: window.innerWidth < 768 ? 0.45 : 0.85,
       transition: {
         duration: 1.2,
@@ -180,7 +180,7 @@ const Header = () => {
   const contentGroupVariants = {
     revealFromBehindSticker: {
       x: 0,
-      y: window.innerWidth < 768 ? '10dvh' : 0, // Move down carefully on mobile
+      y: window.innerWidth < 768 ? '5dvh' : 0, // Move down less on mobile
       opacity: 1,
       transition: {
         duration: 1.0,
@@ -190,7 +190,7 @@ const Header = () => {
     },
     hideBehindSticker: {
       x: window.innerWidth < 768 ? 0 : -140, // On mobile, hide behind top sticker
-      y: window.innerWidth < 768 ? '-20dvh' : 0,
+      y: window.innerWidth < 768 ? '-25dvh' : 0,
       opacity: window.innerWidth < 768 ? 0 : 0.98, // Fade out on mobile to avoid overlap
       transition: {
         duration: 0.8,
@@ -382,7 +382,7 @@ const Header = () => {
                     variants={contentInnerVariants}
                     initial="initial"
                     animate={contentControls}
-                    className="relative flex flex-col items-center text-center md:items-start md:text-left pt-[20dvh] md:pt-0 pb-8 md:pb-0"
+                    className="relative flex flex-col items-center text-center md:items-start md:text-left pt-[14dvh] md:pt-0 pb-12 md:pb-0"
                   >
                     <motion.h1
                       className="text-4xl sm:text-5xl md:text-7xl font-black mb-2 md:mb-4 z-10"
@@ -524,7 +524,7 @@ const Header = () => {
         {/* Scroll Down Indicator - appears after intro */}
         <motion.button
           onClick={() => scrollToSection('about')}
-          className="absolute left-1/2 bottom-8 text-pale-green"
+          className="absolute left-1/2 bottom-4 md:bottom-8 text-pale-green"
           style={{ zIndex: 50, translateX: '-50%' }}
           initial={{ opacity: 0, y: -20 }}
           animate={arrowControls} // control via animation controls
