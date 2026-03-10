@@ -156,8 +156,8 @@ const Header = () => {
     dockLeft: {
       // On mobile, dock to the top instead of left
       x: window.innerWidth < 768 ? 0 : '-28vw',
-      y: window.innerWidth < 768 ? '-36dvh' : 0, 
-      scale: window.innerWidth < 768 ? 0.45 : 0.85,
+      y: window.innerWidth < 768 ? '-22dvh' : 0, 
+      scale: window.innerWidth < 768 ? 0.35 : 0.85,
       transition: {
         duration: 1.2,
         ease: [0.34, 1.56, 0.64, 1], // Bouncy easing to match sticker animations
@@ -167,8 +167,8 @@ const Header = () => {
     // Center state on scroll (larger and more dramatic)
     center: {
       x: 0,
-      y: window.innerWidth < 768 ? '-25dvh' : 0, // Stay somewhat high on mobile
-      scale: window.innerWidth < 768 ? 0.5 : 1.15, // Slightly larger when centered
+      y: window.innerWidth < 768 ? '-20dvh' : 0, // Stay somewhat high on mobile
+      scale: window.innerWidth < 768 ? 0.4 : 1.15, // Slightly larger when centered
       transition: {
         duration: 1.0,
         ease: [0.34, 1.56, 0.64, 1],
@@ -190,7 +190,7 @@ const Header = () => {
     },
     hideBehindSticker: {
       x: window.innerWidth < 768 ? 0 : -140, // On mobile, hide behind top sticker
-      y: window.innerWidth < 768 ? '-25dvh' : 0,
+      y: window.innerWidth < 768 ? '-15dvh' : 0,
       opacity: window.innerWidth < 768 ? 0 : 0.98, // Fade out on mobile to avoid overlap
       transition: {
         duration: 0.8,
@@ -382,10 +382,10 @@ const Header = () => {
                     variants={contentInnerVariants}
                     initial="initial"
                     animate={contentControls}
-                    className="relative flex flex-col items-center text-center md:items-start md:text-left pt-[14dvh] md:pt-0 pb-12 md:pb-0"
+                    className="relative flex flex-col items-center text-center md:items-start md:text-left pt-[35dvh] md:pt-0 pb-16 md:pb-0"
                   >
                     <motion.h1
-                      className="text-4xl sm:text-5xl md:text-7xl font-black mb-2 md:mb-4 z-10"
+                      className="text-3xl sm:text-5xl md:text-7xl font-black mb-1 md:mb-4 z-10 leading-tight"
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 4.8, duration: 0.8 }}
@@ -414,7 +414,7 @@ const Header = () => {
                     </motion.div>
 
                     <motion.p
-                      className="text-base md:text-lg text-gray-400 mb-4 md:mb-8 max-w-xl"
+                      className="text-sm sm:text-base md:text-lg text-gray-400 mb-4 md:mb-8 max-w-xl"
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 5.2, duration: 0.8 }}
@@ -423,19 +423,19 @@ const Header = () => {
                     </motion.p>
 
                     <motion.div
-                      className="flex flex-wrap gap-3 md:gap-4 mb-4 md:mb-8 justify-center md:justify-start"
+                      className="flex flex-row flex-wrap gap-2 sm:gap-3 md:gap-4 mb-2 md:mb-8 justify-center md:justify-start"
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 5.4, duration: 0.8 }}
                     >
                       <motion.button
                         onClick={() => setShowMailPopup(true)}
-                        className="px-6 py-3 md:px-8 md:py-4 bg-red-500 text-white font-bold uppercase tracking-wider hover:bg-red-600 transition-colors relative overflow-hidden group text-sm md:text-base"
+                        className="px-4 py-2 sm:px-6 sm:py-3 md:px-8 md:py-4 bg-red-500 text-white font-bold uppercase tracking-wider hover:bg-red-600 transition-colors relative overflow-hidden group text-xs sm:text-sm md:text-base"
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                       >
-                        <span className="relative z-10 flex items-center gap-2 text-white group-hover:text-black transition-colors duration-300">
-                          <FaEnvelope /> Get In Touch
+                        <span className="relative z-10 flex items-center gap-1 sm:gap-2 text-white group-hover:text-black transition-colors duration-300">
+                          <FaEnvelope className="text-sm md:text-base" /> Get In Touch
                         </span>
                         <motion.div
                           className="absolute inset-0 bg-pale-green"
@@ -446,7 +446,7 @@ const Header = () => {
                       </motion.button>
                       <motion.button
                         onClick={() => scrollToSection('projects')}
-                        className="px-6 py-3 md:px-8 md:py-4 border-2 border-white text-white font-bold uppercase tracking-wider hover:bg-white hover:text-black transition-all text-sm md:text-base"
+                        className="px-4 py-2 sm:px-6 sm:py-3 md:px-8 md:py-4 border-2 border-white text-white font-bold uppercase tracking-wider hover:bg-white hover:text-black transition-all text-xs sm:text-sm md:text-base"
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                       >
@@ -455,7 +455,7 @@ const Header = () => {
                     </motion.div>
 
                     <motion.div
-                      className="flex flex-wrap gap-6 text-gray-400 justify-center md:justify-start"
+                      className="hidden md:flex flex-wrap gap-6 text-gray-400 justify-start"
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       transition={{ delay: 5.6, duration: 0.8 }}
@@ -521,15 +521,15 @@ const Header = () => {
           </div>
         </motion.div>
 
-        {/* Scroll Down Indicator - appears after intro */}
+        {/* Scroll Down Indicator - appears after intro mt-auto */}
         <motion.button
           onClick={() => scrollToSection('about')}
-          className="absolute left-1/2 bottom-4 md:bottom-8 text-pale-green"
+          className="absolute left-1/2 bottom-2 md:bottom-8 text-pale-green"
           style={{ zIndex: 50, translateX: '-50%' }}
           initial={{ opacity: 0, y: -20 }}
-          animate={arrowControls} // control via animation controls
+          animate={arrowControls} 
         >
-          <FaChevronDown size={32} />
+          <FaChevronDown size={30} className="md:w-8 md:h-8 w-6 h-6" />
         </motion.button>
 
 
