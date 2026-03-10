@@ -141,6 +141,7 @@ const Header = () => {
     },
   };
 
+  // Sticker variants updated for responsive behavior
   const stickerVariants = {
     initial: { opacity: 0, scale: 0.85, y: 14, x: 0 },
 
@@ -153,8 +154,10 @@ const Header = () => {
     },
 
     dockLeft: {
-      x: '-28vw',
-      scale: 0.85,
+      // On mobile, dock to the top instead of left
+      x: window.innerWidth < 768 ? 0 : '-28vw',
+      y: window.innerWidth < 768 ? '-25vh' : 0, 
+      scale: window.innerWidth < 768 ? 0.6 : 0.85,
       transition: {
         duration: 1.2,
         ease: [0.34, 1.56, 0.64, 1], // Bouncy easing to match sticker animations
@@ -164,7 +167,8 @@ const Header = () => {
     // Center state on scroll (larger and more dramatic)
     center: {
       x: 0,
-      scale: 1.15, // Slightly larger when centered
+      y: window.innerWidth < 768 ? '-20vh' : 0, // Stay somewhat high on mobile
+      scale: window.innerWidth < 768 ? 0.7 : 1.15, // Slightly larger when centered
       transition: {
         duration: 1.0,
         ease: [0.34, 1.56, 0.64, 1],
@@ -172,10 +176,11 @@ const Header = () => {
     },
   };
 
-  // Content: slides behind sticker + hides, then reveals from behind when sticker moves left
+  // Content: slides behind sticker + hides, then reveals from behind when sticker moves
   const contentGroupVariants = {
     revealFromBehindSticker: {
       x: 0,
+      y: window.innerWidth < 768 ? '15vh' : 0, // Move down on mobile to make room for sticker
       opacity: 1,
       transition: {
         duration: 1.0,
@@ -184,8 +189,9 @@ const Header = () => {
       },
     },
     hideBehindSticker: {
-      x: -140,
-      opacity: 0.98,
+      x: window.innerWidth < 768 ? 0 : -140, // On mobile, hide behind top sticker
+      y: window.innerWidth < 768 ? '-15vh' : 0,
+      opacity: window.innerWidth < 768 ? 0 : 0.98, // Fade out on mobile to avoid overlap
       transition: {
         duration: 0.8,
         ease: [0.19, 1, 0.22, 1],
@@ -280,41 +286,72 @@ const Header = () => {
           </div>
         </div>
 
-        {/* Mobile Menu */}
+        {/* Mobile Menu Overlay */}
         <AnimatePresence>
           {isMobileMenuOpen && (
             <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              className="md:hidden bg-black/95 backdrop-blur-sm border-b-2 border-pale-green overflow-hidden shadow-xl"
+              initial={{ opacity: 0, clipPath: 'circle(0% at top right)' }}
+              animate={{ opacity: 1, clipPath: 'circle(150% at top right)' }}
+              exit={{ opacity: 0, clipPath: 'circle(0% at top right)' }}
+              transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+              className="fixed inset-0 z-[60] bg-black bg-opacity-95 backdrop-blur-xl flex flex-col justify-center items-center overflow-hidden"
             >
-              <div className="px-4 py-6 flex flex-col space-y-4">
-                {['about', 'experience', 'projects', 'skills', 'education', 'contact'].map((section) => (
-                  <button
+              <GeometricBackground variant="dark" />
+              
+              {/* Decorative Elements */}
+              <div className="absolute top-10 left-10 w-32 h-32 border-4 border-red-500 opacity-10 transform rotate-12 pointer-events-none"></div>
+              <div className="absolute bottom-10 right-10 w-48 h-48 bg-pale-green opacity-5 pointer-events-none"></div>
+
+              {/* Close Button */}
+              <button
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="absolute top-5 right-5 text-white hover:text-red-500 transition-colors p-2 z-20"
+                aria-label="Close mobile menu"
+              >
+                <FaTimes size={32} />
+              </button>
+
+              <div className="flex flex-col items-center space-y-6 z-10 w-full px-4">
+                {['about', 'experience', 'projects', 'skills', 'education', 'contact'].map((section, i) => (
+                  <motion.div
                     key={section}
-                    onClick={() => {
-                      setIsMobileMenuOpen(false);
-                      // Slight delay to allow the menu closing animation to start
-                      // before scrolling to the section, otherwise the layout shift
-                      // from the menu closing can interrupt the scroll.
-                      setTimeout(() => {
-                        scrollToSection(section);
-                      }, 100);
-                    }}
-                    className="text-white hover:text-pale-green transition-colors uppercase font-bold text-lg tracking-wider text-left py-2 border-b border-gray-800"
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 30 }}
+                    transition={{ delay: 0.1 + i * 0.1, duration: 0.4 }}
+                    className="w-full text-center flex justify-center"
                   >
-                    {section}
-                  </button>
+                    <button
+                      onClick={() => {
+                        setIsMobileMenuOpen(false);
+                        // Wait for exit animation to complete before scrolling
+                        setTimeout(() => {
+                          scrollToSection(section);
+                        }, 500); 
+                      }}
+                      className="text-white hover:text-pale-green transition-colors uppercase font-black text-3xl sm:text-4xl tracking-widest relative group py-2 px-6 overflow-hidden"
+                    >
+                      <span className="relative z-10">{section}</span>
+                      {/* Hover background effect */}
+                      <span className="absolute inset-0 w-full h-full bg-red-500 transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-300 -z-10"></span>
+                    </button>
+                  </motion.div>
                 ))}
-                <div className="flex space-x-6 pt-4">
-                  <a href={personalInfo.github} target="_blank" rel="noopener noreferrer" className="text-white hover:text-pale-green">
-                    <FaGithub size={24} />
+
+                <motion.div 
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.8 }}
+                  transition={{ delay: 0.7, duration: 0.4 }}
+                  className="flex space-x-8 pt-8 mt-4 border-t-2 border-gray-800 w-2/3 justify-center"
+                >
+                  <a href={personalInfo.github} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white hover:scale-110 transition-all p-2">
+                    <FaGithub size={36} />
                   </a>
-                  <a href={personalInfo.linkedin} target="_blank" rel="noopener noreferrer" className="text-white hover:text-pale-green">
-                    <FaLinkedin size={24} />
+                  <a href={personalInfo.linkedin} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white hover:scale-110 transition-all p-2">
+                    <FaLinkedin size={36} />
                   </a>
-                </div>
+                </motion.div>
               </div>
             </motion.div>
           )}
@@ -345,10 +382,10 @@ const Header = () => {
                     variants={contentInnerVariants}
                     initial="initial"
                     animate={contentControls}
-                    className="relative"
+                    className="relative flex flex-col items-center text-center md:items-start md:text-left pt-[45vh] md:pt-0"
                   >
                     <motion.h1
-                      className="text-4xl sm:text-5xl md:text-7xl font-black mb-4"
+                      className="text-4xl sm:text-5xl md:text-7xl font-black mb-4 z-10"
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 4.8, duration: 0.8 }}
@@ -386,7 +423,7 @@ const Header = () => {
                     </motion.p>
 
                     <motion.div
-                      className="flex flex-wrap gap-4 mb-8"
+                      className="flex flex-wrap gap-4 mb-8 justify-center md:justify-start"
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 5.4, duration: 0.8 }}
@@ -397,7 +434,7 @@ const Header = () => {
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                       >
-                        <span className="relative z-10 flex items-center gap-2">
+                        <span className="relative z-10 flex items-center gap-2 text-white group-hover:text-black transition-colors duration-300">
                           <FaEnvelope /> Get In Touch
                         </span>
                         <motion.div
@@ -413,12 +450,12 @@ const Header = () => {
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                       >
-                        View Projects
+                        <span className="relative z-10">View Projects</span>
                       </motion.button>
                     </motion.div>
 
                     <motion.div
-                      className="flex flex-wrap gap-6 text-gray-400"
+                      className="flex flex-wrap gap-6 text-gray-400 justify-center md:justify-start"
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       transition={{ delay: 5.6, duration: 0.8 }}
@@ -435,9 +472,9 @@ const Header = () => {
               </motion.div>
 
               {/* Sticker mask (moves exactly with sticker) */}
-              {/* Transparent Mask Layer */}
+              {/* Transparent Mask Layer for desktop only */}
               <motion.div
-                className="absolute inset-0 z-20 pointer-events-none"
+                className="hidden md:block absolute inset-0 z-20 pointer-events-none"
                 variants={{
                   dockLeft: { x: '-28vw' },
                   center: { x: 0 },
