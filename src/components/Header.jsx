@@ -156,7 +156,7 @@ const Header = () => {
     dockLeft: {
       // On mobile, dock to the top instead of left
       x: window.innerWidth < 768 ? 0 : '-28vw',
-      y: window.innerWidth < 768 ? '-32vh' : 0, 
+      y: window.innerWidth < 768 ? '-32dvh' : 0, 
       scale: window.innerWidth < 768 ? 0.45 : 0.85,
       transition: {
         duration: 1.2,
@@ -167,7 +167,7 @@ const Header = () => {
     // Center state on scroll (larger and more dramatic)
     center: {
       x: 0,
-      y: window.innerWidth < 768 ? '-25vh' : 0, // Stay somewhat high on mobile
+      y: window.innerWidth < 768 ? '-25dvh' : 0, // Stay somewhat high on mobile
       scale: window.innerWidth < 768 ? 0.5 : 1.15, // Slightly larger when centered
       transition: {
         duration: 1.0,
@@ -180,7 +180,7 @@ const Header = () => {
   const contentGroupVariants = {
     revealFromBehindSticker: {
       x: 0,
-      y: window.innerWidth < 768 ? '10vh' : 0, // Move down carefully on mobile
+      y: window.innerWidth < 768 ? '10dvh' : 0, // Move down carefully on mobile
       opacity: 1,
       transition: {
         duration: 1.0,
@@ -190,7 +190,7 @@ const Header = () => {
     },
     hideBehindSticker: {
       x: window.innerWidth < 768 ? 0 : -140, // On mobile, hide behind top sticker
-      y: window.innerWidth < 768 ? '-20vh' : 0,
+      y: window.innerWidth < 768 ? '-20dvh' : 0,
       opacity: window.innerWidth < 768 ? 0 : 0.98, // Fade out on mobile to avoid overlap
       transition: {
         duration: 0.8,
@@ -359,7 +359,7 @@ const Header = () => {
       </nav>
 
       {/* Hero Section */}
-      <header className="relative min-h-screen overflow-hidden bg-black flex items-center pt-16 md:pt-0">
+      <header className="relative min-h-[100dvh] overflow-hidden bg-black flex items-center pt-16 md:pt-0">
         {/* Base background */}
         <div className="absolute inset-0 z-0">
           <GeometricBackground variant="dark" />
@@ -382,7 +382,7 @@ const Header = () => {
                     variants={contentInnerVariants}
                     initial="initial"
                     animate={contentControls}
-                    className="relative flex flex-col items-center text-center md:items-start md:text-left pt-[20vh] md:pt-0 pb-8 md:pb-0"
+                    className="relative flex flex-col items-center text-center md:items-start md:text-left pt-[20dvh] md:pt-0 pb-8 md:pb-0"
                   >
                     <motion.h1
                       className="text-4xl sm:text-5xl md:text-7xl font-black mb-2 md:mb-4 z-10"
@@ -504,7 +504,7 @@ const Header = () => {
           initial="initial"
           animate={bgControls}
         >
-          <div className="relative w-[92vw] h-[92vh] md:w-[75vw] md:h-[82vh] rounded-3xl overflow-hidden">
+          <div className="relative w-[92vw] h-[92dvh] md:w-[75vw] md:h-[82dvh] rounded-3xl overflow-hidden">
           </div>
         </motion.div>
 
