@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { motion, useAnimationControls } from 'framer-motion';
-import { FaGithub, FaLinkedin, FaEnvelope, FaChevronDown } from 'react-icons/fa';
+import { motion, useAnimationControls, AnimatePresence } from 'framer-motion';
+import { FaGithub, FaLinkedin, FaEnvelope, FaChevronDown, FaBars, FaTimes } from 'react-icons/fa';
 import { personalInfo } from '../data';
 import PersonalSticker from './PersonalSticker';
 import GeometricBackground from './GeometricBackground';
@@ -10,6 +10,7 @@ const Header = () => {
   const [atTop, setAtTop] = useState(true);
   const [introDone, setIntroDone] = useState(false);
   const [showMailPopup, setShowMailPopup] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   // Sequencing controls
   const bgControls = useAnimationControls();
   const stickerControls = useAnimationControls();
@@ -245,7 +246,7 @@ const Header = () => {
               ))}
             </div>
 
-            <div className="flex space-x-4">
+            <div className="hidden md:flex space-x-4">
               <motion.a
                 href={personalInfo.github}
                 target="_blank"
@@ -265,8 +266,59 @@ const Header = () => {
                 <FaLinkedin size={20} />
               </motion.a>
             </div>
+
+            {/* Mobile menu button */}
+            <div className="md:hidden flex items-center">
+              <button
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                className="text-white hover:text-pale-green transition-colors p-2"
+                aria-label="Toggle mobile menu"
+              >
+                {isMobileMenuOpen ? <FaTimes size={24} /> : <FaBars size={24} />}
+              </button>
+            </div>
           </div>
         </div>
+
+        {/* Mobile Menu */}
+        <AnimatePresence>
+          {isMobileMenuOpen && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="md:hidden bg-black/95 backdrop-blur-sm border-b-2 border-pale-green overflow-hidden shadow-xl"
+            >
+              <div className="px-4 py-6 flex flex-col space-y-4">
+                {['about', 'experience', 'projects', 'skills', 'education', 'contact'].map((section) => (
+                  <button
+                    key={section}
+                    onClick={() => {
+                      setIsMobileMenuOpen(false);
+                      // Slight delay to allow the menu closing animation to start
+                      // before scrolling to the section, otherwise the layout shift
+                      // from the menu closing can interrupt the scroll.
+                      setTimeout(() => {
+                        scrollToSection(section);
+                      }, 100);
+                    }}
+                    className="text-white hover:text-pale-green transition-colors uppercase font-bold text-lg tracking-wider text-left py-2 border-b border-gray-800"
+                  >
+                    {section}
+                  </button>
+                ))}
+                <div className="flex space-x-6 pt-4">
+                  <a href={personalInfo.github} target="_blank" rel="noopener noreferrer" className="text-white hover:text-pale-green">
+                    <FaGithub size={24} />
+                  </a>
+                  <a href={personalInfo.linkedin} target="_blank" rel="noopener noreferrer" className="text-white hover:text-pale-green">
+                    <FaLinkedin size={24} />
+                  </a>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </nav>
 
       {/* Hero Section */}
@@ -296,7 +348,7 @@ const Header = () => {
                     className="relative"
                   >
                     <motion.h1
-                      className="text-5xl md:text-7xl font-black mb-4"
+                      className="text-4xl sm:text-5xl md:text-7xl font-black mb-4"
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 4.8, duration: 0.8 }}

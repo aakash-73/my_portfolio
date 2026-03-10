@@ -33,7 +33,7 @@ const Experience = () => {
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
         >
-          <h2 className="text-5xl md:text-6xl font-black mb-4">
+          <h2 className="text-4xl md:text-5xl lg:text-6xl font-black mb-4">
             <span className="text-white">Work</span>{' '}
             <span className="text-red-500">Experience</span>
           </h2>
@@ -68,16 +68,16 @@ const Experience = () => {
                   index % 2 === 0 ? 'md:pr-12' : 'md:pl-12'
                 }`}>
                   <motion.div 
-                    className="bg-white border-4 border-pale-green p-6 relative group hover:border-red-500 transition-all"
-                    whileHover={{ scale: 1.03 }}
+                    className="bg-black border-4 border-pale-green p-6 relative group hover:border-red-500 transition-all shadow-geometric"
+                    whileHover={{ scale: 1.03, y: -5 }}
                   >
                     {/* Corner accents */}
-                    <div className="absolute top-0 left-0 w-4 h-4 bg-red-500"></div>
-                    <div className="absolute bottom-0 right-0 w-4 h-4 bg-pale-green"></div>
+                    <div className="absolute top-0 right-0 w-8 h-8 bg-red-500 transform -translate-y-2 translate-x-2"></div>
+                    <div className="absolute bottom-0 left-0 w-6 h-6 bg-pale-green"></div>
 
-                    <div className="flex items-start justify-between mb-4">
+                    <div className="flex items-start justify-between mb-4 relative z-10">
                       <div>
-                        <h3 className="text-2xl font-black text-black mb-2">
+                        <h3 className="text-2xl font-black text-white mb-2 group-hover:text-pale-green transition-colors">
                           {job.role}
                         </h3>
                         <div className="flex items-center gap-2 text-red-500 font-bold mb-2">
@@ -87,7 +87,7 @@ const Experience = () => {
                       </div>
                     </div>
 
-                    <div className="flex flex-wrap gap-4 text-sm text-gray-600 mb-4">
+                    <div className="flex flex-wrap gap-4 text-sm text-gray-400 mb-4 relative z-10">
                       <div className="flex items-center gap-2">
                         <FaCalendar size={14} />
                         <span className="font-semibold">{job.period}</span>
@@ -98,18 +98,18 @@ const Experience = () => {
                       </div>
                     </div>
 
-                    <ul className="space-y-3 mb-4">
+                    <ul className="space-y-3 mb-4 relative z-10">
                       {job.achievements.map((achievement, idx) => (
                         <li key={idx} className="flex items-start gap-3">
-                          <span className="flex-shrink-0 w-2 h-2 bg-pale-green rounded-full mt-2"></span>
-                          <span className="text-gray-700 text-sm leading-relaxed">
+                          <span className="flex-shrink-0 w-2 h-2 bg-red-500 rounded-none mt-1.5"></span>
+                          <span className="text-gray-300 text-sm leading-relaxed">
                             {achievement}
                           </span>
                         </li>
                       ))}
                     </ul>
 
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex flex-wrap gap-2 relative z-10">
                       {job.technologies.map((tech, idx) => (
                         <span 
                           key={idx}
