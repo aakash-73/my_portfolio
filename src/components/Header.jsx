@@ -156,8 +156,8 @@ const Header = () => {
     dockLeft: {
       // On mobile, dock to the top instead of left
       x: window.innerWidth < 768 ? 0 : '-28vw',
-      y: window.innerWidth < 768 ? '-25vh' : 0, 
-      scale: window.innerWidth < 768 ? 0.6 : 0.85,
+      y: window.innerWidth < 768 ? '-32vh' : 0, 
+      scale: window.innerWidth < 768 ? 0.45 : 0.85,
       transition: {
         duration: 1.2,
         ease: [0.34, 1.56, 0.64, 1], // Bouncy easing to match sticker animations
@@ -167,8 +167,8 @@ const Header = () => {
     // Center state on scroll (larger and more dramatic)
     center: {
       x: 0,
-      y: window.innerWidth < 768 ? '-20vh' : 0, // Stay somewhat high on mobile
-      scale: window.innerWidth < 768 ? 0.7 : 1.15, // Slightly larger when centered
+      y: window.innerWidth < 768 ? '-25vh' : 0, // Stay somewhat high on mobile
+      scale: window.innerWidth < 768 ? 0.5 : 1.15, // Slightly larger when centered
       transition: {
         duration: 1.0,
         ease: [0.34, 1.56, 0.64, 1],
@@ -180,7 +180,7 @@ const Header = () => {
   const contentGroupVariants = {
     revealFromBehindSticker: {
       x: 0,
-      y: window.innerWidth < 768 ? '15vh' : 0, // Move down on mobile to make room for sticker
+      y: window.innerWidth < 768 ? '10vh' : 0, // Move down carefully on mobile
       opacity: 1,
       transition: {
         duration: 1.0,
@@ -190,7 +190,7 @@ const Header = () => {
     },
     hideBehindSticker: {
       x: window.innerWidth < 768 ? 0 : -140, // On mobile, hide behind top sticker
-      y: window.innerWidth < 768 ? '-15vh' : 0,
+      y: window.innerWidth < 768 ? '-20vh' : 0,
       opacity: window.innerWidth < 768 ? 0 : 0.98, // Fade out on mobile to avoid overlap
       transition: {
         duration: 0.8,
@@ -359,7 +359,7 @@ const Header = () => {
       </nav>
 
       {/* Hero Section */}
-      <header className="relative min-h-screen overflow-hidden bg-black flex items-center">
+      <header className="relative min-h-screen overflow-hidden bg-black flex items-center pt-16 md:pt-0">
         {/* Base background */}
         <div className="absolute inset-0 z-0">
           <GeometricBackground variant="dark" />
@@ -382,10 +382,10 @@ const Header = () => {
                     variants={contentInnerVariants}
                     initial="initial"
                     animate={contentControls}
-                    className="relative flex flex-col items-center text-center md:items-start md:text-left pt-[45vh] md:pt-0"
+                    className="relative flex flex-col items-center text-center md:items-start md:text-left pt-[20vh] md:pt-0 pb-8 md:pb-0"
                   >
                     <motion.h1
-                      className="text-4xl sm:text-5xl md:text-7xl font-black mb-4 z-10"
+                      className="text-4xl sm:text-5xl md:text-7xl font-black mb-2 md:mb-4 z-10"
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 4.8, duration: 0.8 }}
@@ -400,21 +400,21 @@ const Header = () => {
                     </motion.h1>
 
                     <motion.div
-                      className="space-y-2 mb-6"
+                      className="space-y-1 md:space-y-2 mb-3 md:mb-6"
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 5.0, duration: 0.8 }}
                     >
-                      <p className="text-2xl md:text-3xl text-pale-green font-bold tracking-wide">
+                      <p className="text-xl md:text-3xl text-pale-green font-bold tracking-wide">
                         {'<'} {personalInfo.title} {' />'}
                       </p>
-                      <p className="text-xl md:text-2xl text-white font-light">
+                      <p className="text-lg md:text-2xl text-white font-light">
                         {personalInfo.subtitle}
                       </p>
                     </motion.div>
 
                     <motion.p
-                      className="text-lg text-gray-400 mb-8 max-w-xl"
+                      className="text-base md:text-lg text-gray-400 mb-4 md:mb-8 max-w-xl"
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 5.2, duration: 0.8 }}
@@ -423,14 +423,14 @@ const Header = () => {
                     </motion.p>
 
                     <motion.div
-                      className="flex flex-wrap gap-4 mb-8 justify-center md:justify-start"
+                      className="flex flex-wrap gap-3 md:gap-4 mb-4 md:mb-8 justify-center md:justify-start"
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 5.4, duration: 0.8 }}
                     >
                       <motion.button
                         onClick={() => setShowMailPopup(true)}
-                        className="px-8 py-4 bg-red-500 text-white font-bold uppercase tracking-wider hover:bg-red-600 transition-colors relative overflow-hidden group"
+                        className="px-6 py-3 md:px-8 md:py-4 bg-red-500 text-white font-bold uppercase tracking-wider hover:bg-red-600 transition-colors relative overflow-hidden group text-sm md:text-base"
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                       >
@@ -446,7 +446,7 @@ const Header = () => {
                       </motion.button>
                       <motion.button
                         onClick={() => scrollToSection('projects')}
-                        className="px-8 py-4 border-2 border-white text-white font-bold uppercase tracking-wider hover:bg-white hover:text-black transition-all"
+                        className="px-6 py-3 md:px-8 md:py-4 border-2 border-white text-white font-bold uppercase tracking-wider hover:bg-white hover:text-black transition-all text-sm md:text-base"
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                       >
