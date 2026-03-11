@@ -201,3 +201,12 @@ a {
 [data-framer-component-type] {
   border-radius: 0 !important;
 }
+
+/* ============================================
+   CUSTOM CURSOR — Hide default on desktop
+   ============================================ */
+@media (pointer: fine) {
+  * {
+    cursor: none !important;
+  }
+}

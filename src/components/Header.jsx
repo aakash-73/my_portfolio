@@ -1,17 +1,36 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion, useAnimationControls, AnimatePresence } from 'framer-motion';
 import { FaGithub, FaLinkedin, FaEnvelope, FaChevronDown, FaBars, FaTimes } from 'react-icons/fa';
 import { personalInfo } from '../data';
 import PersonalSticker from './PersonalSticker';
 import GeometricBackground from './GeometricBackground';
+import ResumeButton from './ResumeButton';
 
-const Header = () => {
+// FIX #1: Custom hook to reactively track window width instead of reading
+// window.innerWidth once inside static variant objects.
+const useWindowWidth = () => {
+  const [width, setWidth] = useState(
+    typeof window !== 'undefined' ? window.innerWidth : 1024
+  );
+  useEffect(() => {
+    const handleResize = () => setWidth(window.innerWidth);
+    window.addEventListener('resize', handleResize, { passive: true });
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+  return width;
+};
+
+const Header = ({ shouldStart = true }) => {
   const [scrolled, setScrolled] = useState(false);
   const [atTop, setAtTop] = useState(true);
   const [introDone, setIntroDone] = useState(false);
   const [showMailPopup, setShowMailPopup] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  // Sequencing controls
+
+  // FIX #1: Use reactive width instead of window.innerWidth in variants
+  const windowWidth = useWindowWidth();
+  const isMobile = windowWidth < 768;
+
   const bgControls = useAnimationControls();
   const stickerControls = useAnimationControls();
   const contentControls = useAnimationControls();
@@ -20,28 +39,23 @@ const Header = () => {
   useEffect(() => {
     const handleScroll = () => {
       const y = window.scrollY;
-
       setScrolled(y > 50);
       setAtTop(y === 0);
     };
-
-    handleScroll(); // init
+    handleScroll();
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   useEffect(() => {
     if (!introDone) return;
-
     if (atTop) {
-      // Sticker docked left → show arrow
       arrowControls.start({
         opacity: 1,
         y: [0, 10, 0],
         transition: { opacity: { duration: 0.6 }, y: { duration: 2, repeat: Infinity } },
       });
     } else {
-      // Sticker moves center → hide arrow
       arrowControls.start({
         opacity: 0,
         y: -20,
@@ -56,71 +70,48 @@ const Header = () => {
   };
 
   const handleMailChoice = (type) => {
-    const subject = encodeURIComponent("Portfolio Contact");
-    const body = encodeURIComponent("Hi,\n\n");
-
+    const subject = encodeURIComponent('Portfolio Contact');
+    const body = encodeURIComponent('Hi,\n\n');
     const mailtoLink = `mailto:${personalInfo.email}?subject=${subject}&body=${body}`;
     const gmailLink = `https://mail.google.com/mail/?view=cm&fs=1&to=${personalInfo.email}&su=${subject}&body=${body}`;
     const outlookWebLink = `https://outlook.live.com/mail/0/deeplink/compose?to=${personalInfo.email}&subject=${subject}&body=${body}`;
-
     switch (type) {
-      case "gmail":
-        window.open(gmailLink, "_blank");
-        break;
-      case "outlook-web":
-        window.open(outlookWebLink, "_blank");
-        break;
-      default:
-        window.location.href = mailtoLink;
+      case 'gmail': window.open(gmailLink, '_blank'); break;
+      case 'outlook-web': window.open(outlookWebLink, '_blank'); break;
+      default: window.location.href = mailtoLink;
     }
-
     setShowMailPopup(false);
   };
 
-  // Enhanced intro sequence with sticker build time
   useEffect(() => {
     const runSequence = async () => {
-      // Step 1: Build background
-      await bgControls.start('build');
-      await bgControls.start('spread');
-
-      // Step 2: Build sticker at center (wait for sticker to complete its 3s build animation)
-      await stickerControls.start('buildCenter');
-
-      // Give the sticker animation time to complete (3.3 seconds total for all 8 steps)
-      await new Promise(resolve => setTimeout(resolve, 3300));
-
-      // Step 3: After sticker is fully built, dock everything left and reveal content
-      bgControls.start('dockLeft');
-      stickerControls.start('dockLeft');
-      contentControls.start('revealFromBehindSticker');
-
-      setIntroDone(true);
+      if (shouldStart) {
+        bgControls.set('dockLeft');
+        stickerControls.start('dockLeft');
+        contentControls.start('revealFromBehindSticker');
+        setIntroDone(true);
+      } else {
+        bgControls.set('build');
+        stickerControls.set('buildCenter');
+      }
     };
-
     runSequence();
-  }, [bgControls, stickerControls, contentControls]);
+  }, [bgControls, stickerControls, contentControls, shouldStart]);
 
-  /**
-   * Scroll interaction (AFTER intro):
-   * - If NOT at top (any scrollY > 0): sticker stays CENTER and content stays hidden behind it
-   * - ONLY when completely at top (scrollY === 0): sticker moves LEFT and content reveals from behind it
-   */
+  // FIX #1: Re-run scroll-driven animations whenever isMobile changes so
+  // the variants recalculate with correct responsive values.
   useEffect(() => {
     if (!introDone) return;
-
     if (!atTop) {
-      // Any amount of scroll down OR scrolling back up but not fully at top
       stickerControls.start('center');
       contentControls.start('hideBehindSticker');
     } else {
-      // Fully at top -> now move sticker left AND reveal content from behind
       stickerControls.start('dockLeft');
       contentControls.start('revealFromBehindSticker');
     }
-  }, [atTop, introDone, stickerControls, contentControls]);
+  }, [atTop, introDone, isMobile, stickerControls, contentControls]);
 
-  // ---------------- Variants ----------------
+  // ---------------- Variants (now using reactive isMobile) ----------------
 
   const bgPanelVariants = {
     initial: { opacity: 0, scale: 0.92, x: 0, filter: 'blur(6px)' },
@@ -137,14 +128,14 @@ const Header = () => {
     dockLeft: {
       x: '-26vw',
       scale: 0.95,
-      transition: { duration: 1.2, ease: [0.34, 1.56, 0.64, 1] }, // Enhanced easing
+      transition: { duration: 1.2, ease: [0.34, 1.56, 0.64, 1] },
     },
   };
 
-  // Sticker variants updated for responsive behavior
+  // FIX #1: Variants now use the reactive `isMobile` variable, not a
+  // one-time window.innerWidth snapshot, so resizing works correctly.
   const stickerVariants = {
     initial: { opacity: 0, scale: 0.85, y: 14, x: 0 },
-
     buildCenter: {
       opacity: 1,
       scale: 1,
@@ -152,50 +143,32 @@ const Header = () => {
       x: 0,
       transition: { duration: 0.8, ease: 'easeOut' },
     },
-
     dockLeft: {
-      // On mobile, dock to the top instead of left
-      x: window.innerWidth < 768 ? 0 : '-28vw',
-      y: window.innerWidth < 768 ? '-22dvh' : 0, 
-      scale: window.innerWidth < 768 ? 0.35 : 0.85,
-      transition: {
-        duration: 1.2,
-        ease: [0.34, 1.56, 0.64, 1], // Bouncy easing to match sticker animations
-      },
+      x: isMobile ? 0 : '-28vw',
+      y: isMobile ? '-22dvh' : 0,
+      scale: isMobile ? 0.35 : 0.85,
+      transition: { duration: 1.2, ease: [0.34, 1.56, 0.64, 1] },
     },
-
-    // Center state on scroll (larger and more dramatic)
     center: {
       x: 0,
-      y: window.innerWidth < 768 ? '-20dvh' : 0, // Stay somewhat high on mobile
-      scale: window.innerWidth < 768 ? 0.4 : 1.15, // Slightly larger when centered
-      transition: {
-        duration: 1.0,
-        ease: [0.34, 1.56, 0.64, 1],
-      },
+      y: isMobile ? '-20dvh' : 0,
+      scale: isMobile ? 0.4 : 1.15,
+      transition: { duration: 1.0, ease: [0.34, 1.56, 0.64, 1] },
     },
   };
 
-  // Content: slides behind sticker + hides, then reveals from behind when sticker moves
   const contentGroupVariants = {
     revealFromBehindSticker: {
       x: 0,
-      y: window.innerWidth < 768 ? '5dvh' : 0, // Move down less on mobile
+      y: isMobile ? '5dvh' : 0,
       opacity: 1,
-      transition: {
-        duration: 1.0,
-        ease: [0.19, 1, 0.22, 1], // Smooth reveal
-        delay: 0.2, // Slight delay for dramatic effect
-      },
+      transition: { duration: 1.0, ease: [0.19, 1, 0.22, 1], delay: 0.2 },
     },
     hideBehindSticker: {
-      x: window.innerWidth < 768 ? 0 : -140, // On mobile, hide behind top sticker
-      y: window.innerWidth < 768 ? '-15dvh' : 0,
-      opacity: window.innerWidth < 768 ? 0 : 0.98, // Fade out on mobile to avoid overlap
-      transition: {
-        duration: 0.8,
-        ease: [0.19, 1, 0.22, 1],
-      },
+      x: isMobile ? 0 : -140,
+      y: isMobile ? '-15dvh' : 0,
+      opacity: isMobile ? 0 : 0.98,
+      transition: { duration: 0.8, ease: [0.19, 1, 0.22, 1] },
     },
   };
 
@@ -204,11 +177,7 @@ const Header = () => {
     revealFromBehindSticker: {
       opacity: 1,
       y: 0,
-      transition: {
-        duration: 0.8,
-        ease: 'easeOut',
-        delay: 0.4, // Cascade after group movement
-      },
+      transition: { duration: 0.8, ease: 'easeOut', delay: 0.4 },
     },
     hideBehindSticker: {
       opacity: 0,
@@ -222,8 +191,10 @@ const Header = () => {
   return (
     <>
       {/* Navigation Bar */}
+      {/* FIX #2: Nav raised to z-[70] so it always sits above the mobile
+          overlay (z-[60]) and the sticker layer (z-40). */}
       <nav
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? 'bg-black border-b-2 border-pale-green shadow-lg' : 'bg-transparent'
+        className={`fixed top-0 left-0 right-0 z-[70] transition-all duration-300 ${scrolled ? 'bg-black border-b-2 border-pale-green shadow-lg' : 'bg-transparent'
           }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -273,7 +244,6 @@ const Header = () => {
               </motion.a>
             </div>
 
-            {/* Mobile menu button */}
             <div className="md:hidden flex items-center">
               <button
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -294,15 +264,15 @@ const Header = () => {
               animate={{ opacity: 1, clipPath: 'circle(150% at top right)' }}
               exit={{ opacity: 0, clipPath: 'circle(0% at top right)' }}
               transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+              // FIX #2: z-[60] is below the nav z-[70] so nav bar stays
+              // accessible; the sticker at z-40 is fully covered by this overlay.
               className="fixed inset-0 z-[60] bg-black bg-opacity-95 backdrop-blur-xl flex flex-col justify-center items-center overflow-hidden"
             >
               <GeometricBackground variant="dark" />
-              
-              {/* Decorative Elements */}
+
               <div className="absolute top-10 left-10 w-32 h-32 border-4 border-red-500 opacity-10 transform rotate-12 pointer-events-none"></div>
               <div className="absolute bottom-10 right-10 w-48 h-48 bg-pale-green opacity-5 pointer-events-none"></div>
 
-              {/* Close Button */}
               <button
                 onClick={() => setIsMobileMenuOpen(false)}
                 className="absolute top-5 right-5 text-white hover:text-red-500 transition-colors p-2 z-20"
@@ -324,21 +294,17 @@ const Header = () => {
                     <button
                       onClick={() => {
                         setIsMobileMenuOpen(false);
-                        // Wait for exit animation to complete before scrolling
-                        setTimeout(() => {
-                          scrollToSection(section);
-                        }, 500); 
+                        setTimeout(() => scrollToSection(section), 500);
                       }}
                       className="text-white hover:text-pale-green transition-colors uppercase font-black text-3xl sm:text-4xl tracking-widest relative group py-2 px-6 overflow-hidden"
                     >
                       <span className="relative z-10">{section}</span>
-                      {/* Hover background effect */}
                       <span className="absolute inset-0 w-full h-full bg-red-500 transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-300 -z-10"></span>
                     </button>
                   </motion.div>
                 ))}
 
-                <motion.div 
+                <motion.div
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.8 }}
@@ -359,13 +325,13 @@ const Header = () => {
       </nav>
 
       {/* Hero Section */}
-      <header className="relative min-h-[100dvh] overflow-hidden bg-black flex items-center pt-16 md:pt-0">
-        {/* Base background */}
+      {/* FIX #4: Use min-h-[100dvh] with pt-16 consistently so content
+          never starts behind the fixed nav on mobile. */}
+      <header className="relative min-h-[100dvh] overflow-hidden bg-black flex items-center pt-16">
         <div className="absolute inset-0 z-0">
           <GeometricBackground variant="dark" />
         </div>
 
-        {/* Content layer (below sticker but above base bg) */}
         <div className="relative z-10 w-full">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="relative overflow-hidden">
@@ -452,6 +418,7 @@ const Header = () => {
                       >
                         <span className="relative z-10">View Projects</span>
                       </motion.button>
+                      <ResumeButton />
                     </motion.div>
 
                     <motion.div
@@ -471,7 +438,6 @@ const Header = () => {
                 </div>
               </motion.div>
 
-              {/* Sticker mask (moves exactly with sticker) */}
               {/* Transparent Mask Layer for desktop only */}
               <motion.div
                 className="hidden md:block absolute inset-0 z-20 pointer-events-none"
@@ -497,15 +463,14 @@ const Header = () => {
           </div>
         </div>
 
-        {/* Center panel BG build/spread -> dock left */}
+        {/* Center panel BG */}
         <motion.div
           className="absolute inset-0 z-30 flex items-center justify-center pointer-events-none"
           variants={bgPanelVariants}
           initial="initial"
           animate={bgControls}
         >
-          <div className="relative w-[92vw] h-[92dvh] md:w-[75vw] md:h-[82dvh] rounded-3xl overflow-hidden">
-          </div>
+          <div className="relative w-[92vw] h-[92dvh] md:w-[75vw] md:h-[82dvh] rounded-3xl overflow-hidden" />
         </motion.div>
 
         {/* Sticker top layer */}
@@ -513,59 +478,61 @@ const Header = () => {
           className="absolute inset-0 z-40 flex items-center justify-center pointer-events-none"
           variants={stickerVariants}
           initial="initial"
-          animate={stickerControls}
+          animate={introDone ? stickerControls : (shouldStart ? 'buildCenter' : 'initial')}
           style={{ transformOrigin: 'center center' }}
         >
           <div className="pointer-events-auto">
-            <PersonalSticker size={650} />
+            <PersonalSticker size={650} skipIntro={true} />
           </div>
         </motion.div>
 
-        {/* Scroll Down Indicator - appears after intro mt-auto */}
+        {/* FIX #3: Use `transform` (valid CSS property) instead of
+            `translateX` for centering. Replaced with Tailwind -translate-x-1/2
+            to avoid any inline style conflict with Framer Motion. */}
         <motion.button
           onClick={() => scrollToSection('about')}
-          className="absolute left-1/2 bottom-2 md:bottom-8 text-pale-green"
-          style={{ zIndex: 50, translateX: '-50%' }}
+          className="absolute left-1/2 -translate-x-1/2 bottom-2 md:bottom-8 text-pale-green z-50"
           initial={{ opacity: 0, y: -20 }}
-          animate={arrowControls} 
+          animate={arrowControls}
         >
           <FaChevronDown size={30} className="md:w-8 md:h-8 w-6 h-6" />
         </motion.button>
 
-
+        {/* FIX #5: Clicking the dark backdrop now closes the mail popup. */}
         {showMailPopup && (
-          <div className="fixed inset-0 bg-black bg-opacity-80 z-[100] flex items-center justify-center">
+          <div
+            className="fixed inset-0 bg-black bg-opacity-80 z-[100] flex items-center justify-center"
+            onClick={() => setShowMailPopup(false)}
+          >
             <motion.div
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               className="bg-black border-4 border-pale-green p-8 rounded-xl text-white w-[90%] max-w-md"
+              // Prevent backdrop click from propagating through the modal itself
+              onClick={(e) => e.stopPropagation()}
             >
               <h3 className="text-2xl font-bold mb-6 text-center">
                 Choose Email Method
               </h3>
-
               <div className="space-y-4">
                 <button
-                  onClick={() => handleMailChoice("default")}
+                  onClick={() => handleMailChoice('default')}
                   className="w-full py-3 border-2 border-white hover:bg-white hover:text-black transition-all"
                 >
                   Default Mail App
                 </button>
-
                 <button
-                  onClick={() => handleMailChoice("gmail")}
+                  onClick={() => handleMailChoice('gmail')}
                   className="w-full py-3 border-2 border-white hover:bg-white hover:text-black transition-all"
                 >
                   Gmail (Browser)
                 </button>
-
                 <button
-                  onClick={() => handleMailChoice("outlook-web")}
+                  onClick={() => handleMailChoice('outlook-web')}
                   className="w-full py-3 border-2 border-white hover:bg-white hover:text-black transition-all"
                 >
                   Outlook Web
                 </button>
-
                 <button
                   onClick={() => setShowMailPopup(false)}
                   className="w-full py-3 text-gray-400 hover:text-white"
