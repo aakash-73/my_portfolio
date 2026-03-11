@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaFileDownload, FaCheck } from 'react-icons/fa';
+import resume from "../assets/resume.pdf";
 
 const ResumeButton = () => {
   const [isHovered, setIsHovered] = useState(false);
@@ -10,7 +11,7 @@ const ResumeButton = () => {
 
     // Trigger download
     const link = document.createElement('a');
-    link.href = '/resume.pdf';
+    link.href = resume;
     link.download = 'Aakash_Reddy_Resume.pdf';
     document.body.appendChild(link);
     link.click();
