@@ -8,8 +8,6 @@ const ResumeButton = () => {
   const [downloaded, setDownloaded] = useState(false);
 
   const handleDownload = () => {
-
-    // Trigger download
     const link = document.createElement('a');
     link.href = resume;
     link.download = 'Aakash_Reddy_Resume.pdf';
