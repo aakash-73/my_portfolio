@@ -13,22 +13,24 @@ import SplashScreen from './components/SplashScreen';
 import './index.css';
 
 function App() {
-  const [splashDone, setSplashDone] = useState(false);
+  const [transitionDone, setTransitionDone] = useState(false);
 
   const handleSplashComplete = useCallback(() => {
-    setSplashDone(true);
+    setTransitionDone(true);
   }, []);
 
   return (
     <>
       <CustomCursor />
-      
+
       <AnimatePresence>
-        {!splashDone && <SplashScreen onComplete={handleSplashComplete} />}
+        {!transitionDone && (
+          <SplashScreen onComplete={handleSplashComplete} />
+        )}
       </AnimatePresence>
 
       <div className="min-h-screen bg-black text-white">
-        <Header shouldStart={splashDone} />
+        <Header shouldStart={transitionDone} />
         <main>
           <About />
           <Experience />

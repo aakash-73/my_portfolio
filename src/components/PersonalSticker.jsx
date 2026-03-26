@@ -1,30 +1,63 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { motion, useSpring, useTransform, useMotionValue } from 'framer-motion';
+import {
+  motion,
+  useSpring,
+  useTransform,
+  useMotionValue,
+} from 'framer-motion';
 import profilePic from '../assets/profilePic.png';
 
-// FIX #8: Generate a unique ID per component instance so SVG clipPath
-// IDs don't collide when PersonalSticker is mounted more than once.
-let instanceCounter = 0;
+let _uid = 0;
+const useStableId = () => {
+  const id = useRef(null);
+  if (id.current === null) id.current = `sticker-${++_uid}`;
+  return id.current;
+};
 
-const PersonalSticker = ({ size = 300, skipIntro = false }) => {
+/**
+ * Each layer zooms in from scale 4 → 1 with blur clearing,
+ * staggered so you see the sticker assembling piece by piece —
+ * mirroring how the splash deconstructed by zooming each piece outward.
+ *
+ * Layer order (mirrors splash deconstruct in reverse):
+ *   0 — outer rings
+ *   1 — triangle ring
+ *   2 — corner squares
+ *   3 — big red triangle
+ *   4 — hex card
+ *   5 — AN badge
+ *   6–9 — orbital shapes
+ *   10+ — floating squares
+ */
+const SPRING_EASE = [0.22, 1.2, 0.36, 1];
+const STAGGER = 0.18;
+const ZOOM_FROM = 4;
+const ZOOM_BLUR = '14px';
+
+const zoomLayer = (i, skipIntro) => {
+  if (skipIntro) return { initial: false, animate: {}, transition: {} };
+  const delay = i * STAGGER;
+  return {
+    initial: { scale: ZOOM_FROM, opacity: 0, filter: `blur(${ZOOM_BLUR})` },
+    animate: { scale: 1, opacity: 1, filter: 'blur(0px)' },
+    transition: { duration: 0.75, ease: SPRING_EASE, delay },
+  };
+};
+
+const PersonalSticker = ({ size = 650, skipIntro = false }) => {
   const [isFlipped, setIsFlipped] = useState(false);
+  const stickerId = useStableId();
+  const hexClipId = `${stickerId}-hexClip`;
+  const containerRef = useRef(null);
 
-  // FIX #8: Stable unique ID per instance using a ref (avoids re-render on mount)
-  const instanceId = useRef(`sticker-${++instanceCounter}`);
-  const hexClipId = `${instanceId.current}-hexClip`;
-
-  // FIX #7: Use Framer Motion's useMotionValue for raw mouse tracking so
-  // orbiting / floating elements animate without causing React re-renders.
+  // ── Mouse tracking ─────────────────────────────────────────────────────
   const rawMouseX = useMotionValue(0);
   const rawMouseY = useMotionValue(0);
-
-  // Smooth springs for 3D rotation
   const xSpring = useSpring(0, { stiffness: 150, damping: 20 });
   const ySpring = useSpring(0, { stiffness: 150, damping: 20 });
   const rotateX = useTransform(ySpring, [-1, 1], [20, -20]);
   const rotateY = useTransform(xSpring, [-1, 1], [-20, 20]);
 
-  // Derived motion values for parallax layers — no state, no re-renders
   const layer1X = useTransform(rawMouseX, (v) => v * 15);
   const layer1Y = useTransform(rawMouseY, (v) => v * 15);
   const layer2X = useTransform(rawMouseX, (v) => v * 20);
@@ -39,31 +72,32 @@ const PersonalSticker = ({ size = 300, skipIntro = false }) => {
   const orbitBaseX = useTransform(rawMouseX, (v) => v * 50);
   const orbitBaseY = useTransform(rawMouseY, (v) => v * 50);
 
+  // Floating parallax — no hooks in loops
+  const f0 = useTransform(rawMouseX, (v) => v * 10);
+  const f1 = useTransform(rawMouseX, (v) => v * 12);
+  const f2 = useTransform(rawMouseX, (v) => v * 14);
+  const f3 = useTransform(rawMouseX, (v) => v * 16);
+  const f4 = useTransform(rawMouseX, (v) => v * 18);
+  const f5 = useTransform(rawMouseX, (v) => v * 20);
+  const f6 = useTransform(rawMouseX, (v) => v * 22);
+  const f7 = useTransform(rawMouseX, (v) => v * 24);
+  const floatXValues = [f0, f1, f2, f3, f4, f5, f6, f7];
+
   const handleMouseMove = (e) => {
     const rect = e.currentTarget.getBoundingClientRect();
     const x = (e.clientX - rect.left - rect.width / 2) / (rect.width / 2);
     const y = (e.clientY - rect.top - rect.height / 2) / (rect.height / 2);
-    // FIX #7: Set motion values directly — no setState, no re-render
-    rawMouseX.set(x);
-    rawMouseY.set(y);
-    xSpring.set(x);
-    ySpring.set(y);
+    rawMouseX.set(x); rawMouseY.set(y);
+    xSpring.set(x); ySpring.set(y);
   };
 
   const handleMouseLeave = () => {
-    rawMouseX.set(0);
-    rawMouseY.set(0);
-    xSpring.set(0);
-    ySpring.set(0);
+    rawMouseX.set(0); rawMouseY.set(0);
+    xSpring.set(0); ySpring.set(0);
   };
 
-  const handleClick = () => setIsFlipped((v) => !v);
-
-  // FIX #6: Auto-flip uses IntersectionObserver to avoid flipping when
-  // the sticker is off-screen (docked tiny, or scrolled past).
-  const containerRef = useRef(null);
+  // ── Auto-flip ─────────────────────────────────────────────────────────
   const isVisibleRef = useRef(true);
-
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => { isVisibleRef.current = entry.isIntersecting; },
@@ -74,35 +108,33 @@ const PersonalSticker = ({ size = 300, skipIntro = false }) => {
   }, []);
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      // FIX #6: Only flip when the sticker is actually visible
-      if (isVisibleRef.current) {
-        setIsFlipped((prev) => !prev);
-      }
+    const id = setInterval(() => {
+      if (isVisibleRef.current) setIsFlipped((p) => !p);
     }, 5000);
-    return () => clearInterval(interval);
+    return () => clearInterval(id);
   }, []);
 
-  const hexagonPoints = (radius = 50, cx = 50, cy = 50) => {
-    const points = [];
+  // ── Geometry ─────────────────────────────────────────────────────────────
+  const hexagonPoints = (r = 50, cx = 50, cy = 50) => {
+    const pts = [];
     for (let i = 0; i < 6; i++) {
-      const angle = (Math.PI / 3) * i - Math.PI / 6;
-      const x = cx + radius * Math.cos(angle);
-      const y = cy + radius * Math.sin(angle);
-      points.push(`${x},${y}`);
+      const a = (Math.PI / 3) * i - Math.PI / 6;
+      pts.push(`${cx + r * Math.cos(a)},${cy + r * Math.sin(a)}`);
     }
-    return points.join(' ');
+    return pts.join(' ');
   };
 
   const orbitingItems = [
-    { shape: 'triangle', angle: 0, color: 'bg-green-500', invert: false },
-    { shape: 'square', angle: 90, color: 'bg-red-500' },
-    { shape: 'triangle', angle: 180, color: 'bg-green-500', invert: true },
-    { shape: 'square', angle: 270, color: 'bg-red-500' },
+    { shape: 'triangle', angle: 0, triColor: '#10B981', invert: false, color: 'bg-green-500' },
+    { shape: 'square', angle: 90, triColor: '#EF4444', color: 'bg-red-500' },
+    { shape: 'triangle', angle: 180, triColor: '#10B981', invert: true, color: 'bg-green-500' },
+    { shape: 'square', angle: 270, triColor: '#EF4444', color: 'bg-red-500' },
   ];
 
-  const TRIANGLE_RADIUS = size / 2.2;
-  const SQUARE_RADIUS = size / 2.2;
+  const ORBIT_RADIUS = size / 2.2;
+
+  // ── Pre-compute layer anim objects ────────────────────────────────────
+  const L = Array.from({ length: 18 }, (_, i) => zoomLayer(i, skipIntro));
 
   return (
     <motion.div
@@ -112,22 +144,18 @@ const PersonalSticker = ({ size = 300, skipIntro = false }) => {
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
     >
-      {/* Container that tilts based on mouse */}
       <motion.div
         className="relative w-full h-full flex items-center justify-center"
         style={{ rotateX, rotateY, transformStyle: 'preserve-3d' }}
       >
-        {/* Outer rotating circles */}
+
+        {/* ── Layer 0: outer rotating rings ─────────────────────────────── */}
         <motion.div
           className="absolute w-full h-full"
           style={{ transform: 'translateZ(-50px)', x: layer1X, y: layer1Y }}
-          initial={{ scale: 0, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1, rotate: 360 }}
-          transition={{
-            scale: { delay: skipIntro ? 0 : 0, duration: 0.6 },
-            opacity: { delay: skipIntro ? 0 : 0, duration: 0.6 },
-            rotate: { duration: 25, repeat: Infinity, ease: 'linear' },
-          }}
+          initial={L[0].initial}
+          animate={{ ...L[0].animate, rotate: 360 }}
+          transition={{ ...L[0].transition, rotate: { duration: 25, repeat: Infinity, ease: 'linear' } }}
         >
           <svg viewBox="0 0 100 100" className="w-full h-full">
             <circle cx="50" cy="50" r="48" fill="none" stroke="#10B981" strokeWidth="2" opacity="0.4" />
@@ -135,25 +163,20 @@ const PersonalSticker = ({ size = 300, skipIntro = false }) => {
           </svg>
         </motion.div>
 
-        {/* Rotating triangles ring */}
+        {/* ── Layer 1: rotating triangle ring ───────────────────────────── */}
         <motion.div
           className="absolute w-full h-full"
           style={{ transform: 'translateZ(-20px)', x: layer2X, y: layer2Y }}
-          initial={{ scale: 0, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1, rotate: -360 }}
-          transition={{
-            scale: { delay: skipIntro ? 0 : 0.2, duration: 0.6 },
-            opacity: { delay: skipIntro ? 0 : 0.2, duration: 0.6 },
-            rotate: { duration: 30, repeat: Infinity, ease: 'linear' },
-          }}
+          initial={L[1].initial}
+          animate={{ ...L[1].animate, rotate: -360 }}
+          transition={{ ...L[1].transition, rotate: { duration: 30, repeat: Infinity, ease: 'linear' } }}
         >
           {[0, 60, 120, 180, 240, 300].map((angle) => (
             <div
               key={angle}
               className="absolute"
               style={{
-                left: '50%',
-                top: '50%',
+                left: '50%', top: '50%',
                 transform: `rotate(${angle}deg) translateX(${size * 0.42}px) translateY(-50%)`,
               }}
             >
@@ -163,50 +186,43 @@ const PersonalSticker = ({ size = 300, skipIntro = false }) => {
                   borderLeft: '8px solid transparent',
                   borderRight: '8px solid transparent',
                   borderBottom: '12px solid #10B981',
-                  filter: 'drop-shadow(0 0 3px rgba(16, 185, 129, 0.5))',
+                  filter: 'drop-shadow(0 0 3px rgba(16,185,129,0.5))',
                 }}
               />
             </div>
           ))}
         </motion.div>
 
-        {/* Corner squares layer */}
+        {/* ── Layer 2: corner squares ────────────────────────────────────── */}
         <motion.div
           className="absolute w-4/5 h-4/5"
           style={{ transform: 'translateZ(20px)', x: layer3X, y: layer3Y }}
-          initial={{ scale: 0, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1, rotate: [0, 5, -5, 0] }}
-          transition={{
-            scale: { delay: skipIntro ? 0 : 0.4, duration: 0.6 },
-            opacity: { delay: skipIntro ? 0 : 0.4, duration: 0.6 },
-            rotate: { duration: 4, repeat: Infinity, ease: 'easeInOut' },
-          }}
+          initial={L[2].initial}
+          animate={{ ...L[2].animate, rotate: [0, 5, -5, 0] }}
+          transition={{ ...L[2].transition, rotate: { duration: 4, repeat: Infinity, ease: 'easeInOut' } }}
         >
           <div className="relative w-full h-full">
-            <div className="absolute top-0 left-0 w-6 h-6 bg-red-500 border-2 border-white" />
-            <div className="absolute top-0 right-0 w-6 h-6 bg-green-500 border-2 border-white" />
-            <div className="absolute bottom-0 left-0 w-6 h-6 bg-green-500 border-2 border-white" />
-            <div className="absolute bottom-0 right-0 w-6 h-6 bg-red-500 border-2 border-white" />
+            <div className="absolute top-0 left-0     w-6 h-6 bg-red-500   border-2 border-white" />
+            <div className="absolute top-0 right-0    w-6 h-6 bg-green-500 border-2 border-white" />
+            <div className="absolute bottom-0 left-0  w-6 h-6 bg-green-500 border-2 border-white" />
+            <div className="absolute bottom-0 right-0 w-6 h-6 bg-red-500   border-2 border-white" />
           </div>
         </motion.div>
 
-        {/* Big triangle behind center */}
+        {/* ── Layer 3: big red triangle ──────────────────────────────────── */}
         <motion.div
-          className="absolute w-100 h-100"
+          className="absolute w-full h-full"
           style={{ transform: 'translateZ(40px)', x: layer4X, y: layer4Y }}
-          initial={{ scale: 0, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{
-            scale: { delay: skipIntro ? 0 : 0.6, duration: 0.6 },
-            opacity: { delay: skipIntro ? 0 : 0.6, duration: 0.6 },
-          }}
+          initial={L[3].initial}
+          animate={L[3].animate}
+          transition={L[3].transition}
         >
           <svg viewBox="0 0 100 100" className="w-full h-full">
-            <polygon points="50,10 90,85 10,85" fill="rgba(239, 68, 68, 0.3)" stroke="#EF4444" strokeWidth="2" />
+            <polygon points="50,11 88,72 12,72" fill="rgba(239,68,68,0.3)" stroke="#EF4444" strokeWidth="2" />
           </svg>
         </motion.div>
 
-        {/* Flipping card */}
+        {/* ── Layer 4: flipping hex card ─────────────────────────────────── */}
         <motion.div
           className="absolute w-5/6 h-5/6 cursor-pointer overflow-hidden"
           style={{
@@ -218,13 +234,10 @@ const PersonalSticker = ({ size = 300, skipIntro = false }) => {
             x: layer5X,
             y: layer5Y,
           }}
-          initial={{ scale: 0, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{
-            scale: { delay: skipIntro ? 0 : 0.8, duration: 0.6 },
-            opacity: { delay: skipIntro ? 0 : 0.8, duration: 0.6 },
-          }}
-          onClick={handleClick}
+          initial={L[4].initial}
+          animate={L[4].animate}
+          transition={L[4].transition}
+          onClick={() => setIsFlipped((v) => !v)}
         >
           <motion.div
             className="relative w-full h-full"
@@ -232,14 +245,13 @@ const PersonalSticker = ({ size = 300, skipIntro = false }) => {
             animate={{ rotateY: isFlipped ? 180 : 0 }}
             transition={{ duration: 0.8, ease: 'easeInOut' }}
           >
-            {/* Front - Hexagon with photo */}
+            {/* Front */}
             <div
               className="absolute w-full h-full"
               style={{ backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden', transform: 'translateZ(0.1px)' }}
             >
               <svg width="100" height="100" viewBox="0 0 100 100" className="w-full h-full">
                 <defs>
-                  {/* FIX #8: Unique clipPath ID per instance */}
                   <clipPath id={hexClipId}>
                     <polygon points={hexagonPoints(46, 50, 50)} />
                   </clipPath>
@@ -254,17 +266,14 @@ const PersonalSticker = ({ size = 300, skipIntro = false }) => {
                 />
                 <image
                   href={profilePic}
-                  x="-5"
-                  y="-5"
-                  width="110"
-                  height="110"
+                  x="-5" y="-5" width="110" height="110"
                   preserveAspectRatio="xMidYMid slice"
                   clipPath={`url(#${hexClipId})`}
                 />
               </svg>
             </div>
 
-            {/* Back - Face sticker */}
+            {/* Back */}
             <div
               className="absolute w-full h-full"
               style={{ backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden', transform: 'rotateY(180deg) translateZ(0.1px)' }}
@@ -273,8 +282,7 @@ const PersonalSticker = ({ size = 300, skipIntro = false }) => {
                 <div
                   className="absolute top-1/2 left-1/2 rounded-full bg-gradient-to-br from-orange-400 via-orange-500 to-orange-600 shadow-2xl flex items-center justify-center overflow-hidden"
                   style={{
-                    width: '80%',
-                    height: '80%',
+                    width: '80%', height: '80%',
                     transform: 'translate(-50%, -50%)',
                     border: `${size * 0.013}px solid #10B981`,
                   }}
@@ -312,57 +320,55 @@ const PersonalSticker = ({ size = 300, skipIntro = false }) => {
           </motion.div>
         </motion.div>
 
-        {/* Initials overlay */}
+        {/* ── Layer 5: AN badge ──────────────────────────────────────────── */}
         <motion.div
           className="absolute bottom-8 bg-black border-4 border-[#10B981] px-5 py-3"
           style={{ transform: 'translateZ(120px)', x: initialsX }}
-          initial={{ y: 50, opacity: 0 }}
-          animate={{ y: [0, -5, 0], opacity: 1 }}
+          initial={skipIntro ? false : { ...L[5].initial, y: 40 }}
+          animate={{ ...L[5].animate, y: [0, -5, 0] }}
           transition={{
-            y: { duration: 2, repeat: Infinity, delay: skipIntro ? 0 : 1.2 },
-            opacity: { delay: skipIntro ? 0 : 1.2, duration: 0.6 },
+            ...L[5].transition,
+            y: {
+              duration: 2,
+              repeat: Infinity,
+              delay: skipIntro ? 0 : (L[5].transition.delay ?? 0) + 0.6,
+            },
           }}
         >
           <div className="text-white font-black text-3xl tracking-widest">AN</div>
         </motion.div>
 
-        {/* Orbiting geometric shapes */}
+        {/* ── Layers 6–9: orbital shapes ─────────────────────────────────── */}
         {orbitingItems.map((item, i) => {
-          const baseRadius = item.shape === 'square' ? SQUARE_RADIUS : TRIANGLE_RADIUS;
-          const triColor = item.color === 'bg-red-500' ? '#EF4444' : '#10B981';
-          const startAngleRad = (item.angle * Math.PI) / 180;
-
+          const startRad = (item.angle * Math.PI) / 180;
+          const orb = L[6 + i];
           return (
             <motion.div
               key={i}
               className="absolute"
               style={{ transform: 'translateZ(60px)' }}
-              initial={{ scale: 0, opacity: 0 }}
+              initial={orb.initial}
               animate={{
-                scale: 1,
-                opacity: 1,
+                ...orb.animate,
                 x: [
-                  Math.cos(startAngleRad) * baseRadius,
-                  Math.cos(startAngleRad + Math.PI * 2) * baseRadius,
+                  Math.cos(startRad) * ORBIT_RADIUS,
+                  Math.cos(startRad + Math.PI * 2) * ORBIT_RADIUS,
                 ],
                 y: [
-                  Math.sin(startAngleRad) * baseRadius,
-                  Math.sin(startAngleRad + Math.PI * 2) * baseRadius,
+                  Math.sin(startRad) * ORBIT_RADIUS,
+                  Math.sin(startRad + Math.PI * 2) * ORBIT_RADIUS,
                 ],
               }}
               transition={{
-                scale: { delay: skipIntro ? 0 : 1.4 + i * 0.1, duration: 0.4 },
-                opacity: { delay: skipIntro ? 0 : 1.4 + i * 0.1, duration: 0.4 },
+                ...orb.transition,
                 x: { duration: 6, repeat: Infinity, ease: 'linear', delay: i * 0.4 },
                 y: { duration: 6, repeat: Infinity, ease: 'linear', delay: i * 0.4 },
               }}
             >
-              {/* FIX #7: Mouse parallax for orbiting shapes applied via a
-                  child motion.div so the orbit animation on the parent is
-                  unaffected. This avoids mixing state-driven and
-                  motion-value-driven transforms on the same element. */}
               <motion.div style={{ x: orbitBaseX, y: orbitBaseY }}>
-                {item.shape === 'square' && <div className={`w-4 h-4 ${item.color}`} />}
+                {item.shape === 'square' && (
+                  <div className={`w-4 h-4 ${item.color}`} />
+                )}
                 {item.shape === 'triangle' && (
                   <div
                     className="w-0 h-0"
@@ -370,8 +376,8 @@ const PersonalSticker = ({ size = 300, skipIntro = false }) => {
                       borderLeft: '6px solid transparent',
                       borderRight: '6px solid transparent',
                       ...(item.invert
-                        ? { borderTop: `8px solid ${triColor}` }
-                        : { borderBottom: `8px solid ${triColor}` }),
+                        ? { borderTop: `8px solid ${item.triColor}` }
+                        : { borderBottom: `8px solid ${item.triColor}` }),
                     }}
                   />
                 )}
@@ -380,9 +386,9 @@ const PersonalSticker = ({ size = 300, skipIntro = false }) => {
           );
         })}
 
-        {/* Floating small squares */}
-        {[...Array(8)].map((_, i) => {
-          const floatX = useTransform(rawMouseX, (v) => v * (10 + i * 2));
+        {/* ── Layers 10+: floating squares ───────────────────────────────── */}
+        {floatXValues.map((floatX, i) => {
+          const fl = L[10 + i];
           return (
             <motion.div
               key={`float-${i}`}
@@ -391,23 +397,20 @@ const PersonalSticker = ({ size = 300, skipIntro = false }) => {
                 left: `${20 + i * 10}%`,
                 top: `${10 + (i % 4) * 20}%`,
                 transform: 'translateZ(10px)',
-                // FIX #7: Use motion value instead of state
                 x: floatX,
               }}
-              initial={{ scale: 0, opacity: 0 }}
-              animate={{
-                scale: [1, 1.5, 1],
-                y: [0, -20, 0],
-                opacity: [0.3, 0.7, 0.3],
-              }}
+              initial={fl.initial}
+              animate={{ ...fl.animate, scale: [1, 1.5, 1], y: [0, -20, 0], opacity: [0.3, 0.7, 0.3] }}
               transition={{
-                scale: { duration: 3, repeat: Infinity, delay: 1.8 + i * 0.1 },
-                y: { duration: 3, repeat: Infinity, delay: 1.8 + i * 0.1 },
-                opacity: { duration: 3, repeat: Infinity, delay: 1.8 + i * 0.1 },
+                ...fl.transition,
+                scale: { duration: 3, repeat: Infinity, delay: skipIntro ? i * 0.1 : (fl.transition.delay ?? 0) + 0.3 },
+                y: { duration: 3, repeat: Infinity, delay: skipIntro ? i * 0.1 : (fl.transition.delay ?? 0) + 0.3 },
+                opacity: { duration: 3, repeat: Infinity, delay: skipIntro ? i * 0.1 : (fl.transition.delay ?? 0) + 0.3 },
               }}
             />
           );
         })}
+
       </motion.div>
     </motion.div>
   );
