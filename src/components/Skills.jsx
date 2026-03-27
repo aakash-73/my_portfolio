@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { technicalSkills, softSkills } from '../data';
 import GeometricBackground from './GeometricBackground';
+import TiltCard from './TiltCard';
 
 const Skills = () => {
   return (
@@ -37,17 +38,16 @@ const Skills = () => {
           <h3 className="text-3xl font-black text-white mb-8 text-center uppercase tracking-wider">
             <span className="border-b-4 border-pale-green pb-2">Technical Arsenal</span>
           </h3>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 items-stretch">
             {technicalSkills.map((category, idx) => (
+              <TiltCard key={idx} maxTilt={10} perspective={1200} scaleOnHover={1.03} className="h-full">
               <motion.div
-                key={idx}
                 data-cursor="skills-card"
-                className="bg-white border-4 border-pale-green p-6 relative hover:border-red-500 transition-all"
+                className="bg-white border-4 border-pale-green p-6 relative hover:border-red-500 transition-all h-full flex flex-col"
                 initial={{ opacity: 0, y: 50 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.4, delay: idx * 0.1 }}
-                whileHover={{ scale: 1.03 }}
               >
                 {/* Corner accent */}
                 <div className="absolute top-0 right-0 w-4 h-4 bg-red-500"></div>
@@ -56,7 +56,7 @@ const Skills = () => {
                   <span className="w-3 h-3 bg-pale-green"></span>
                   {category.category}
                 </h4>
-                <div className="flex flex-wrap gap-3">
+                <div className="flex flex-wrap gap-3 mt-auto">
                   {category.skills.map((skill, skillIdx) => (
                     <motion.span
                       key={skillIdx}
@@ -71,6 +71,7 @@ const Skills = () => {
                   ))}
                 </div>
               </motion.div>
+              </TiltCard>
             ))}
           </div>
         </div>
@@ -80,17 +81,16 @@ const Skills = () => {
           <h3 className="text-3xl font-black text-white mb-8 text-center uppercase tracking-wider">
             <span className="border-b-4 border-red-500 pb-2">Professional Strengths</span>
           </h3>
-          <div className="grid md:grid-cols-3 lg:grid-cols-5 gap-6">
+          <div className="grid md:grid-cols-3 lg:grid-cols-5 gap-6 items-stretch">
             {softSkills.map((skill, idx) => (
+              <TiltCard key={idx} maxTilt={12} perspective={1000} scaleOnHover={1.04} className="h-full">
               <motion.div
-                key={idx}
                 data-cursor="skills-card"
-                className="bg-white border-4 border-black p-6 text-center relative group hover:border-pale-green transition-all"
+                className="bg-white border-4 border-black p-6 text-center relative group hover:border-pale-green transition-all h-full flex flex-col justify-center"
                 initial={{ opacity: 0, scale: 0.8 }}
                 whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.4, delay: idx * 0.1 }}
-                whileHover={{ y: -10 }}
               >
                 {/* Corner decorations */}
                 <div className="absolute top-0 left-0 w-3 h-3 bg-red-500"></div>
@@ -106,6 +106,7 @@ const Skills = () => {
                   {skill.description}
                 </p>
               </motion.div>
+              </TiltCard>
             ))}
           </div>
         </div>

@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { FaBriefcase, FaMapMarkerAlt, FaCalendar } from 'react-icons/fa';
 import { experience } from '../data';
 import GeometricBackground from './GeometricBackground';
+import TiltCard from './TiltCard';
 
 const Experience = () => {
   return (
@@ -67,10 +68,11 @@ const Experience = () => {
                 <div className={`w-full md:w-5/12 ${
                   index % 2 === 0 ? 'md:pr-12' : 'md:pl-12'
                 }`}>
+                  <TiltCard maxTilt={8} perspective={1200} scaleOnHover={1.03} className="h-full">
                   <motion.div 
                     data-cursor="experience-card"
-                    className="bg-black border-4 border-pale-green p-6 relative group hover:border-red-500 transition-all shadow-geometric"
-                    whileHover={{ scale: 1.03, y: -5 }}
+                    className="bg-black border-4 border-pale-green p-6 relative group hover:border-red-500 transition-all shadow-geometric h-full flex flex-col"
+                    whileHover={{ y: -5 }}
                   >
                     {/* Corner accents */}
                     <div className="absolute top-0 right-0 w-8 h-8 bg-red-500 transform -translate-y-2 translate-x-2"></div>
@@ -99,7 +101,7 @@ const Experience = () => {
                       </div>
                     </div>
 
-                    <ul className="space-y-3 mb-4 relative z-10">
+                    <ul className="space-y-3 mb-4 relative z-10 flex-1">
                       {job.achievements.map((achievement, idx) => (
                         <li key={idx} className="flex items-start gap-3">
                           <span className="flex-shrink-0 w-2 h-2 bg-red-500 rounded-none mt-1.5"></span>
@@ -110,7 +112,7 @@ const Experience = () => {
                       ))}
                     </ul>
 
-                    <div className="flex flex-wrap gap-2 relative z-10">
+                    <div className="flex flex-wrap gap-2 relative z-10 mt-auto">
                       {job.technologies.map((tech, idx) => (
                         <span 
                           key={idx}
@@ -121,6 +123,7 @@ const Experience = () => {
                       ))}
                     </div>
                   </motion.div>
+                  </TiltCard>
                 </div>
               </motion.div>
             ))}

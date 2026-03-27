@@ -2,7 +2,8 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { FaGraduationCap, FaMapMarkerAlt, FaCalendar, FaStar } from 'react-icons/fa';
 import { education } from '../data';
-import GeometricBackground from './GeometricBackground'; // Assuming you have a GeometricBackground component
+import GeometricBackground from './GeometricBackground';
+import TiltCard from './TiltCard';
 
 const Education = () => {
   return (
@@ -87,10 +88,10 @@ const Education = () => {
 
         <div className="max-w-4xl mx-auto">
           {education.map((edu, index) => (
+            <TiltCard key={index} maxTilt={6} perspective={1200} scaleOnHover={1.02} className="mb-8">
             <motion.div 
-              key={index}
               data-cursor="education-card"
-              className="bg-black border-4 border-pale-green p-8 relative hover:border-red-500 transition-all"
+              className="bg-black border-4 border-pale-green p-8 relative hover:border-red-500 transition-all h-full flex flex-col"
               initial={{ opacity: 0, y: 50 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -148,6 +149,7 @@ const Education = () => {
                 </div>
               </div>
             </motion.div>
+            </TiltCard>
           ))}
         </div>
       </div>

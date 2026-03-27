@@ -151,12 +151,9 @@ const CustomCursor = () => {
       else if (t.closest('[data-cursor="experience-card"]')) setVariant('experience-card');
       else if (t.closest('[data-cursor="skills-card"]')) setVariant('skills-card');
       else if (t.closest('[data-cursor="education-card"]')) setVariant('education-card');
+      else if (t.closest('[data-cursor="contact-card"]')) setVariant('contact-card');
+      else if (t.closest('[data-cursor="about-card"]')) setVariant('about-card');
       else if (t.closest('a, button, [role="button"]')) setVariant('interactive');
-      else if (t.closest('#contact')) setVariant('contact');
-      else if (t.closest('#about')) setVariant('about');
-      else if (t.closest('#experience')) setVariant('experience');
-      else if (t.closest('#skills')) setVariant('skills');
-      else if (t.closest('#education')) setVariant('education');
       else setVariant('default');
     };
 
@@ -282,7 +279,7 @@ const CustomCursor = () => {
     },
   };
 
-  ['experience', 'skills', 'education'].forEach(sec => {
+  ['experience', 'skills', 'education', 'contact', 'about'].forEach(sec => {
     cfg[`${sec}-card`] = {
       ...cfg[sec],
       size: 52,

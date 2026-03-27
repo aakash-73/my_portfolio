@@ -25,6 +25,14 @@ function App() {
   }, []);
 
   useEffect(() => {
+    // Force scroll to top on initial load so splash screen is viewed properly
+    window.scrollTo(0, 0);
+    if ('scrollRestoration' in history) {
+      history.scrollRestoration = 'manual';
+    }
+  }, []);
+
+  useEffect(() => {
     if (!transitionDone || !headerReady) {
       document.body.style.overflow = 'hidden';
     } else {

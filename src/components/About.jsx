@@ -2,6 +2,7 @@ import React, { useMemo } from "react";
 import { motion } from "framer-motion";
 import { about } from "../data";
 import GeometricBackground from "./GeometricBackground";
+import TiltCard from "./TiltCard";
 
 const About = () => {
   // Keep the random shapes stable across re-renders
@@ -108,36 +109,43 @@ const About = () => {
           </div>
         </motion.div>
 
-        {/* Centered content */}
+        {/* Centered content card */}
+        <TiltCard maxTilt={8} perspective={1200} scaleOnHover={1.02} className="max-w-4xl mx-auto mb-16 block">
         <motion.div
-          className="max-w-3xl mx-auto mb-16"
+          data-cursor="about-card"
+          className="bg-black border-4 border-pale-green p-8 md:p-12 relative group hover:border-red-500 transition-all"
           initial={{ opacity: 0, y: 40 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
         >
-          <p className="text-gray-800 text-lg leading-relaxed mb-8 text-justify">
+          {/* Corner accents */}
+          <div className="absolute top-0 right-0 w-8 h-8 bg-red-500 transform -translate-y-2 translate-x-2"></div>
+          <div className="absolute bottom-0 left-0 w-6 h-6 bg-pale-green"></div>
+
+          <p className="text-gray-300 text-lg leading-relaxed mb-10 text-justify relative z-10">
             {about.summary}
           </p>
 
-          <div className="space-y-5">
+          <div className="space-y-6 relative z-10">
             {about.highlights.map((highlight, index) => (
               <motion.div
                 key={index}
-                className="flex items-start gap-3"
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
+                className="flex items-start gap-4 p-4 bg-white/5 border-l-4 border-red-500 group-hover:border-pale-green transition-colors"
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
-                transition={{ duration: 0.4, delay: index * 0.08 }}
+                transition={{ duration: 0.4, delay: index * 0.1 }}
               >
-                <div className="flex-shrink-0 w-6 h-6 border-2 border-red-500 bg-pale-green transform rotate-45 mt-1"></div>
-                <p className="text-gray-700 text-justify">
+                <div className="flex-shrink-0 w-4 h-4 bg-red-500 group-hover:bg-pale-green transform rotate-45 mt-1 transition-colors"></div>
+                <p className="text-gray-300 text-justify text-sm leading-relaxed">
                   {highlight}
                 </p>
               </motion.div>
             ))}
           </div>
         </motion.div>
+        </TiltCard>
       </div>
     </section>
   );

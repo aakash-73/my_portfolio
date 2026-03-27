@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { FaGithub, FaLinkedin } from 'react-icons/fa';
 import { personalInfo } from '../data';
 import GeometricBackground from './GeometricBackground';
+import TiltCard from './TiltCard';
 
 const Contact = () => {
   const currentYear = new Date().getFullYear();
@@ -100,22 +101,22 @@ const Contact = () => {
         <div className="max-w-4xl mx-auto">
 
           {/* Social Links */}
-          <div className="grid md:grid-cols-2 gap-6 mb-12">
+          <div className="grid md:grid-cols-2 gap-6 mb-12 items-stretch">
             {[
               { icon: FaLinkedin, label: "LinkedIn", href: personalInfo.linkedin },
               { icon: FaGithub, label: "GitHub", href: personalInfo.github }
             ].map((contact, index) => (
+              <TiltCard key={index} maxTilt={8} perspective={1200} scaleOnHover={1.04} className="h-full">
               <motion.a
-                key={index}
                 href={contact.href}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="bg-white border-4 border-pale-green p-6 relative group hover:border-red-500 transition-all"
+                data-cursor="contact-card"
+                className="block bg-white border-4 border-pale-green p-6 relative group hover:border-red-500 transition-all h-full flex items-center"
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.4, delay: index * 0.1 }}
-                whileHover={{ scale: 1.05 }}
               >
                 <div className="flex items-center gap-4">
                   <div className="p-3 bg-black group-hover:bg-red-500 transition-colors">
@@ -128,12 +129,15 @@ const Contact = () => {
                   </div>
                 </div>
               </motion.a>
+              </TiltCard>
             ))}
           </div>
 
           {/* Contact Form */}
+          <TiltCard maxTilt={4} perspective={1400} scaleOnHover={1.01}>
           <motion.form
             onSubmit={handleSubmit}
+            data-cursor="contact-card"
             className="bg-red-500 border-4 border-white p-8 relative"
             initial={{ opacity: 0, scale: 0.9 }}
             whileInView={{ opacity: 1, scale: 1 }}
@@ -213,6 +217,7 @@ const Contact = () => {
 
             </div>
           </motion.form>
+          </TiltCard>
         </div>
       </div>
 

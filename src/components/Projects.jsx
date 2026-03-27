@@ -107,8 +107,8 @@ const Projects = () => {
                 key={category}
                 onClick={() => setActiveCategory(category)}
                 className={`px-6 py-3 font-bold uppercase tracking-wider text-sm transition-all border-2 ${activeCategory === category
-                    ? "bg-red-500 text-white border-red-500"
-                    : "bg-white text-black border-black hover:border-pale-green"
+                  ? "bg-red-500 text-white border-red-500"
+                  : "bg-white text-black border-black hover:border-pale-green"
                   }`}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -139,8 +139,8 @@ const Projects = () => {
                 <div
                   data-cursor="project"
                   className={`bg-black border-4 relative group cursor-pointer overflow-hidden transition-colors ${isExpanded
-                      ? "border-red-500"
-                      : "border-pale-green hover:border-red-500"
+                    ? "border-red-500"
+                    : "border-pale-green hover:border-red-500"
                     }`}
                   onClick={() => toggleExpand(project.id)}
                   role="button"
