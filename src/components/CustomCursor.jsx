@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { motion, useSpring, animate } from 'framer-motion';
+import { motion, useSpring } from 'framer-motion';
+import { FaUser, FaBriefcase, FaBolt, FaGraduationCap, FaEnvelope } from 'react-icons/fa';
 
 /**
  * CustomCursor — fully aligned with PersonalSticker design language
@@ -147,8 +148,15 @@ const CustomCursor = () => {
     const over = (e) => {
       const t = e.target;
       if (t.closest('[data-cursor="project"]')) setVariant('project');
-      else if (t.closest('#contact')) setVariant('contact');
+      else if (t.closest('[data-cursor="experience-card"]')) setVariant('experience-card');
+      else if (t.closest('[data-cursor="skills-card"]')) setVariant('skills-card');
+      else if (t.closest('[data-cursor="education-card"]')) setVariant('education-card');
       else if (t.closest('a, button, [role="button"]')) setVariant('interactive');
+      else if (t.closest('#contact')) setVariant('contact');
+      else if (t.closest('#about')) setVariant('about');
+      else if (t.closest('#experience')) setVariant('experience');
+      else if (t.closest('#skills')) setVariant('skills');
+      else if (t.closest('#education')) setVariant('education');
       else setVariant('default');
     };
 
@@ -207,6 +215,58 @@ const CustomCursor = () => {
       centerContent: 'badge',
       badgeText: '</>',
     },
+    about: {
+      size: 46,
+      outerStroke: GREEN,
+      innerStroke: GREEN,
+      spinDur: '5s',
+      orbitR: 20,
+      orbitSpeed: 2,
+      showTriRing: true,
+      showCorners: false,
+      showOrbit: true,
+      centerContent: 'badge',
+      badgeIcon: <FaUser size={8} />,
+    },
+    experience: {
+      size: 46,
+      outerStroke: RED,
+      innerStroke: RED,
+      spinDur: '4s',
+      orbitR: 20,
+      orbitSpeed: 3,
+      showTriRing: true,
+      showCorners: false,
+      showOrbit: true,
+      centerContent: 'badge',
+      badgeIcon: <FaBriefcase size={8} />,
+    },
+    skills: {
+      size: 46,
+      outerStroke: GREEN,
+      innerStroke: RED,
+      spinDur: '3s',
+      orbitR: 20,
+      orbitSpeed: 4,
+      showTriRing: true,
+      showCorners: false,
+      showOrbit: true,
+      centerContent: 'badge',
+      badgeIcon: <FaBolt size={8} />,
+    },
+    education: {
+      size: 46,
+      outerStroke: GREEN,
+      innerStroke: GREEN,
+      spinDur: '4s',
+      orbitR: 20,
+      orbitSpeed: 2.5,
+      showTriRing: true,
+      showCorners: false,
+      showOrbit: true,
+      centerContent: 'badge',
+      badgeIcon: <FaGraduationCap size={8} />,
+    },
     contact: {
       size: 46,
       outerStroke: GREEN,
@@ -218,9 +278,20 @@ const CustomCursor = () => {
       showCorners: false,
       showOrbit: true,
       centerContent: 'badge',
-      badgeText: '✉',
+      badgeIcon: <FaEnvelope size={8} />,
     },
   };
+
+  ['experience', 'skills', 'education'].forEach(sec => {
+    cfg[`${sec}-card`] = {
+      ...cfg[sec],
+      size: 52,
+      spinDur: '0.6s',
+      orbitR: 26,
+      orbitSpeed: 5.5,
+      showCorners: true,
+    };
+  });
 
   const c = cfg[variant];
 
@@ -330,7 +401,7 @@ const CustomCursor = () => {
               </motion.svg>
             )}
 
-            {c.centerContent === 'badge' && c.badgeText && (
+            {(c.centerContent === 'badge' && (c.badgeText || c.badgeIcon)) && (
               /* AN-badge style — black box, green border, white text */
               <motion.div
                 key={variant + '-badge'}
@@ -341,16 +412,19 @@ const CustomCursor = () => {
                 style={{
                   background: '#000',
                   border: `1.5px solid ${GREEN}`,
-                  padding: '1px 4px',
+                  padding: c.badgeIcon ? '3px' : '1px 4px',
                   color: '#fff',
                   fontFamily: 'monospace',
                   fontWeight: 900,
                   fontSize: '7px',
                   letterSpacing: '0.05em',
                   whiteSpace: 'nowrap',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
                 }}
               >
-                {c.badgeText}
+                {c.badgeIcon || c.badgeText}
               </motion.div>
             )}
           </div>
@@ -375,8 +449,8 @@ const CustomCursor = () => {
             visible={c.showOrbit}
           />
 
-          {/* ── Extra fast orbitals on project variant ── */}
-          {variant === 'project' && (
+          {/* ── Extra fast orbitals on project var and card variants ── */}
+          {(variant === 'project' || variant.endsWith('-card')) && (
             <>
               <OrbitalDot orbitR={c.orbitR * 0.6} speed={c.orbitSpeed * 1.4} shape="square" color={RED} angleOffset={Math.PI / 2} visible />
               <OrbitalDot orbitR={c.orbitR * 0.6} speed={-c.orbitSpeed * 1.4} shape="triangle" color={GREEN} angleOffset={Math.PI * 1.5} visible />

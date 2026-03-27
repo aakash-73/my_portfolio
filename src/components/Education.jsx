@@ -89,6 +89,7 @@ const Education = () => {
           {education.map((edu, index) => (
             <motion.div 
               key={index}
+              data-cursor="education-card"
               className="bg-black border-4 border-pale-green p-8 relative hover:border-red-500 transition-all"
               initial={{ opacity: 0, y: 50 }}
               whileInView={{ opacity: 1, y: 0 }}

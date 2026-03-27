@@ -41,6 +41,7 @@ const Skills = () => {
             {technicalSkills.map((category, idx) => (
               <motion.div
                 key={idx}
+                data-cursor="skills-card"
                 className="bg-white border-4 border-pale-green p-6 relative hover:border-red-500 transition-all"
                 initial={{ opacity: 0, y: 50 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -83,6 +84,7 @@ const Skills = () => {
             {softSkills.map((skill, idx) => (
               <motion.div
                 key={idx}
+                data-cursor="skills-card"
                 className="bg-white border-4 border-black p-6 text-center relative group hover:border-pale-green transition-all"
                 initial={{ opacity: 0, scale: 0.8 }}
                 whileInView={{ opacity: 1, scale: 1 }}

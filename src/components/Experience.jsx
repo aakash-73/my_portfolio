@@ -68,6 +68,7 @@ const Experience = () => {
                   index % 2 === 0 ? 'md:pr-12' : 'md:pl-12'
                 }`}>
                   <motion.div 
+                    data-cursor="experience-card"
                     className="bg-black border-4 border-pale-green p-6 relative group hover:border-red-500 transition-all shadow-geometric"
                     whileHover={{ scale: 1.03, y: -5 }}
                   >

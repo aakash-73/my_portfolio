@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import Header from './components/Header';
 import About from './components/About';
@@ -14,10 +14,27 @@ import './index.css';
 
 function App() {
   const [transitionDone, setTransitionDone] = useState(false);
+  const [headerReady, setHeaderReady] = useState(false);
 
   const handleSplashComplete = useCallback(() => {
     setTransitionDone(true);
   }, []);
+
+  const handleHeaderReady = useCallback(() => {
+    setHeaderReady(true);
+  }, []);
+
+  useEffect(() => {
+    if (!transitionDone || !headerReady) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [transitionDone, headerReady]);
 
   return (
     <>
@@ -30,7 +47,7 @@ function App() {
       </AnimatePresence>
 
       <div className="min-h-screen bg-black text-white">
-        <Header shouldStart={transitionDone} />
+        <Header shouldStart={transitionDone} onReady={handleHeaderReady} />
         <main>
           <About />
           <Experience />

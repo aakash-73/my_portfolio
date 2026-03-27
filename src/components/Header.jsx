@@ -27,7 +27,7 @@ const useWindowWidth = () => {
   return width;
 };
 
-const Header = ({ shouldStart = true }) => {
+const Header = ({ shouldStart = true, onReady }) => {
   const [scrolled, setScrolled] = useState(false);
   const [atTop, setAtTop] = useState(true);
   const [introDone, setIntroDone] = useState(false);
@@ -106,11 +106,16 @@ const Header = ({ shouldStart = true }) => {
       stickerControls.start('dockLeft');
       contentControls.start('revealFromBehindSticker');
       setIntroDone(true);
+      
+      // Wait for all text elements to finish fading in (longest animation takes 1.9s)
+      setTimeout(() => {
+        if (!cancelled && onReady) onReady();
+      }, 2000);
     };
 
     run();
     return () => { cancelled = true; };
-  }, [shouldStart, bgControls, stickerControls, contentControls]);
+  }, [shouldStart, bgControls, stickerControls, contentControls, onReady]);
 
   // ── Scroll-driven sticker position (after intro) ──────────────────────────
   useEffect(() => {
