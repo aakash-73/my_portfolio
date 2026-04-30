@@ -4,7 +4,7 @@ export const personalInfo = {
   title: "Full Stack Developer",
   subtitle: "Machine Learning Engineer",
   tagline: "Crafting intelligent solutions at the intersection of code and creativity",
-  email: "aakashrnuthalpati0703@gmail.com",
+  email: "aakashreddy3702@gmail.com",
   linkedin: "https://linkedin.com/in/aakash-reddy-nuthalapati",
   github: "https://github.com/aakash-73",
   location: "Edmond, OK"
