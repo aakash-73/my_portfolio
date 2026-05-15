@@ -102,78 +102,139 @@ const Projects = () => {
           </div>
 
           <div className="flex flex-wrap justify-center gap-3">
-            {categories.map((category) => (
-              <motion.button
-                key={category}
-                onClick={() => setActiveCategory(category)}
-                className={`px-6 py-3 font-bold uppercase tracking-wider text-sm transition-all border-2 ${activeCategory === category
-                  ? "bg-red-500 text-white border-red-500"
-                  : "bg-white text-black border-black hover:border-pale-green"
+            {categories.map((category) => {
+              const isInProgress = category === "In Progress";
+              const isLive = category === "Live";
+              const isActive = activeCategory === category;
+              return (
+                <motion.button
+                  key={category}
+                  onClick={() => setActiveCategory(category)}
+                  className={`px-6 py-3 font-bold uppercase tracking-wider text-sm transition-all border-2 flex items-center gap-2 ${
+                    isActive
+                      ? isInProgress
+                        ? "bg-amber-500 text-black border-amber-500"
+                        : isLive
+                        ? "bg-emerald-500 text-white border-emerald-500"
+                        : "bg-red-500 text-white border-red-500"
+                      : isInProgress
+                      ? "bg-white text-amber-500 border-amber-500 hover:bg-amber-50"
+                      : isLive
+                      ? "bg-white text-emerald-600 border-emerald-500 hover:bg-emerald-50"
+                      : "bg-white text-black border-black hover:border-pale-green"
                   }`}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                {category}
-              </motion.button>
-            ))}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  {isLive && (
+                    <span className={`w-2 h-2 rounded-full animate-pulse ${isActive ? "bg-white" : "bg-emerald-500"}`} />
+                  )}
+                  {isInProgress && (
+                    <span className={`w-2 h-2 rounded-full animate-pulse ${isActive ? "bg-black" : "bg-amber-500"}`} />
+                  )}
+                  {category}
+                </motion.button>
+              );
+            })}
           </div>
         </motion.div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 items-start">
+        {/* items-stretch ensures every card in a row matches the tallest */}
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 items-stretch">
           {filteredProjects.map((project, index) => {
             const isExpanded = expandedId === project.id;
+            const isInProgress = project.inProgress === true;
+            const isLive = !!project.liveUrl;
             const collapsedTech = project.technologies.slice(0, 3);
             const remainingCount = Math.max(project.technologies.length - 3, 0);
 
             return (
-              // Pass disabled={isExpanded} so TiltCard removes its 3D
-              // transform wrapper when the card is open — this lets the
-              // card's natural height be read correctly by the browser.
               <TiltCard
                 key={project.id}
                 disabled={isExpanded}
                 maxTilt={10}
                 perspective={1200}
                 scaleOnHover={1.04}
+                className="h-full"
               >
                 <div
                   data-cursor="project"
-                  className={`bg-black border-4 relative group cursor-pointer overflow-hidden transition-colors ${isExpanded
-                    ? "border-red-500"
-                    : "border-pale-green hover:border-red-500"
-                    }`}
-                  onClick={() => toggleExpand(project.id)}
+                  className={`h-full flex flex-col border-4 relative group cursor-pointer overflow-hidden transition-colors ${
+                    isInProgress
+                      ? isExpanded
+                        ? "bg-black border-amber-500"
+                        : "bg-black border-amber-500/60 hover:border-amber-500"
+                      : isLive
+                      ? isExpanded
+                        ? "bg-black border-emerald-500"
+                        : "bg-black border-emerald-500/60 hover:border-emerald-500"
+                      : isExpanded
+                      ? "bg-black border-red-500"
+                      : "bg-black border-pale-green hover:border-red-500"
+                  }`}
+                  onClick={(e) => {
+                    if (project.liveUrl && (e.ctrlKey || e.metaKey)) {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      window.open(project.liveUrl, "_blank", "noopener,noreferrer");
+                    } else {
+                      toggleExpand(project.id);
+                    }
+                  }}
                   role="button"
                   tabIndex={0}
+                  title={isLive ? "Ctrl+Click to open live project" : undefined}
                   onKeyDown={(e) => {
                     if (e.key === "Enter" || e.key === " ") {
                       e.preventDefault();
-                      toggleExpand(project.id);
+                      if (project.liveUrl && (e.ctrlKey || e.metaKey)) {
+                        window.open(project.liveUrl, "_blank", "noopener,noreferrer");
+                      } else {
+                        toggleExpand(project.id);
+                      }
                     }
                   }}
                   aria-expanded={isExpanded}
                 >
                   {/* Corner geometric accents */}
-                  <div className="absolute top-0 right-0 w-8 h-8 bg-red-500 transform -translate-y-2 translate-x-2 z-10" />
-                  <div className="absolute bottom-0 left-0 w-6 h-6 bg-pale-green z-10" />
+                  <div className={`absolute top-0 right-0 w-8 h-8 transform -translate-y-2 translate-x-2 z-10 ${isInProgress ? "bg-amber-500" : isLive ? "bg-emerald-500" : "bg-red-500"}`} />
+                  <div className={`absolute bottom-0 left-0 w-6 h-6 z-10 ${isInProgress ? "bg-amber-500/50" : isLive ? "bg-emerald-500/50" : "bg-pale-green"}`} />
 
-                  <div className="p-6">
+
+                  {/* Ctrl+Click hint — fades in on hover for Live cards only */}
+                  {isLive && (
+                    <div className="absolute bottom-3 right-3 z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center gap-1 px-2 py-1 bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 text-[9px] font-bold uppercase tracking-wider pointer-events-none">
+                      Ctrl+Click to visit
+                    </div>
+                  )}
+
+                  <div className="p-6 flex flex-col flex-1">
                     <motion.div
+                      className="flex flex-col flex-1"
                       initial={{ opacity: 0, y: 50 }}
                       whileInView={{ opacity: 1, y: 0 }}
                       viewport={{ once: true }}
                       transition={{ duration: 0.4, delay: index * 0.1 }}
                     >
                       <div className="flex items-start justify-between mb-4">
-                        <div className="p-3 bg-pale-green group-hover:bg-red-500 transition-colors">
-                          <FaCode className="text-black" size={24} />
+                        <div className={`p-3 transition-colors ${isInProgress ? "bg-amber-500/20 group-hover:bg-amber-500" : isLive ? "bg-emerald-500/20 group-hover:bg-emerald-500" : "bg-pale-green group-hover:bg-red-500"}`}>
+                          <FaCode className="text-white" size={24} />
                         </div>
-                        <span className="px-3 py-1 bg-white text-black text-xs font-bold uppercase tracking-wider">
-                          {project.category}
-                        </span>
+                        <div className="flex flex-col items-end gap-1">
+                          <span className="flex items-center gap-1.5 px-3 py-1 bg-white text-black text-xs font-bold uppercase tracking-wider">
+                            {isLive && <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />}
+                            {isInProgress && <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />}
+                            {project.category}
+                          </span>
+                          {project.year && (
+                            <span className="px-2 py-0.5 text-gray-500 text-xs font-bold">
+                              {project.year}
+                            </span>
+                          )}
+                        </div>
                       </div>
 
-                      <h3 className="text-xl font-black text-white mb-3 group-hover:text-pale-green transition-colors">
+                      <h3 className={`text-xl font-black text-white mb-3 transition-colors ${isInProgress ? "group-hover:text-amber-400" : isLive ? "group-hover:text-emerald-400" : "group-hover:text-pale-green"}`}>
                         {project.title}
                       </h3>
 
@@ -185,58 +246,57 @@ const Projects = () => {
                         <ul className="space-y-2 mb-4">
                           {project.highlights.map((highlight, idx) => (
                             <li key={idx} className="flex items-start gap-2 text-xs text-gray-500">
-                              <span className="flex-shrink-0 w-2 h-2 bg-red-500 mt-1" />
+                              <span className={`flex-shrink-0 w-2 h-2 mt-1 ${isInProgress ? "bg-amber-500" : isLive ? "bg-emerald-500" : "bg-red-500"}`} />
                               <span>{highlight}</span>
                             </li>
                           ))}
                         </ul>
                       )}
 
-                      {/* Always-visible collapsed tech badges */}
-                      <div className="flex flex-wrap gap-2">
-                        {collapsedTech.map((tech, idx) => (
-                          <span
-                            key={idx}
-                            className="px-2 py-1 border border-pale-green text-pale-green text-xs font-bold"
-                          >
-                            {tech}
-                          </span>
-                        ))}
+                      {/* Tech badges pinned to the bottom of the card */}
+                      <div className="mt-auto">
+                        <div className="flex flex-wrap gap-2">
+                          {collapsedTech.map((tech, idx) => (
+                            <span
+                              key={idx}
+                              className={`px-2 py-1 border text-xs font-bold ${isInProgress ? "border-amber-500/60 text-amber-400" : isLive ? "border-emerald-500/60 text-emerald-400" : "border-pale-green text-pale-green"}`}
+                            >
+                              {tech}
+                            </span>
+                          ))}
 
-                        {/* +N badge — hidden when expanded */}
-                        {!isExpanded && remainingCount > 0 && (
-                          <span className="px-2 py-1 text-gray-500 text-xs font-bold">
-                            +{remainingCount}
-                          </span>
-                        )}
+                          {!isExpanded && remainingCount > 0 && (
+                            <span className="px-2 py-1 text-gray-500 text-xs font-bold">
+                              +{remainingCount}
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Extra tech badges revealed on expand */}
+                        <AnimatePresence initial={false}>
+                          {isExpanded && remainingCount > 0 && (
+                            <motion.div
+                              key="extra-tech"
+                              initial={{ opacity: 0, height: 0 }}
+                              animate={{ opacity: 1, height: "auto" }}
+                              exit={{ opacity: 0, height: 0 }}
+                              transition={{ duration: 0.3, ease: "easeInOut" }}
+                              className="overflow-hidden"
+                            >
+                              <div className="flex flex-wrap gap-2 mt-2">
+                                {project.technologies.slice(3).map((tech, idx) => (
+                                  <span
+                                    key={idx}
+                                    className={`px-2 py-1 border text-xs font-bold ${isInProgress ? "border-amber-500/60 text-amber-400" : isLive ? "border-emerald-500/60 text-emerald-400" : "border-pale-green text-pale-green"}`}
+                                  >
+                                    {tech}
+                                  </span>
+                                ))}
+                              </div>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
                       </div>
-
-                      {/* Extra tech badges revealed on expand using
-                          AnimatePresence + height animation so the card
-                          physically grows and the browser can measure it. */}
-                      <AnimatePresence initial={false}>
-                        {isExpanded && remainingCount > 0 && (
-                          <motion.div
-                            key="extra-tech"
-                            initial={{ opacity: 0, height: 0 }}
-                            animate={{ opacity: 1, height: "auto" }}
-                            exit={{ opacity: 0, height: 0 }}
-                            transition={{ duration: 0.3, ease: "easeInOut" }}
-                            className="overflow-hidden"
-                          >
-                            <div className="flex flex-wrap gap-2 mt-2">
-                              {project.technologies.slice(3).map((tech, idx) => (
-                                <span
-                                  key={idx}
-                                  className="px-2 py-1 border border-pale-green text-pale-green text-xs font-bold"
-                                >
-                                  {tech}
-                                </span>
-                              ))}
-                            </div>
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
                     </motion.div>
                   </div>
                 </div>

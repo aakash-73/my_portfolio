@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { FaBriefcase, FaMapMarkerAlt, FaCalendar } from 'react-icons/fa';
 import { experience } from '../data';
@@ -6,28 +6,41 @@ import GeometricBackground from './GeometricBackground';
 import TiltCard from './TiltCard';
 
 const Experience = () => {
+  // Stable random shapes — generated once, not on every render
+  const bgShapes = useMemo(
+    () =>
+      [...Array(10)].map(() => ({
+        width: Math.random() * 200 + 100,
+        height: Math.random() * 200 + 100,
+        left: `${Math.random() * 100}%`,
+        top: `${Math.random() * 100}%`,
+        rotate: Math.random() * 360,
+      })),
+    []
+  );
+
   return (
     <section id="experience" className="py-20 bg-black relative overflow-hidden">
       {/* Geometric background */}
       <GeometricBackground variant="dark" />
       <div className="absolute inset-0 opacity-5">
-        {[...Array(10)].map((_, i) => (
+        {bgShapes.map((s, i) => (
           <div
             key={i}
             className="absolute border-2 border-pale-green"
             style={{
-              width: Math.random() * 200 + 100,
-              height: Math.random() * 200 + 100,
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              transform: `rotate(${Math.random() * 360}deg)`
+              width: s.width,
+              height: s.height,
+              left: s.left,
+              top: s.top,
+              transform: `rotate(${s.rotate}deg)`,
             }}
           />
         ))}
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <motion.div 
+        <motion.div
           className="text-center mb-16"
           initial={{ opacity: 0, y: 50 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -51,7 +64,7 @@ const Experience = () => {
 
           <div className="space-y-12">
             {experience.map((job, index) => (
-              <motion.div 
+              <motion.div
                 key={job.id}
                 className={`relative flex items-center ${
                   index % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'
@@ -65,64 +78,66 @@ const Experience = () => {
                 <div className="hidden md:block absolute left-1/2 transform -translate-x-1/2 w-8 h-8 bg-red-500 border-4 border-black z-10 rotate-45"></div>
 
                 {/* Content card */}
-                <div className={`w-full md:w-5/12 ${
-                  index % 2 === 0 ? 'md:pr-12' : 'md:pl-12'
-                }`}>
+                <div
+                  className={`w-full md:w-5/12 ${
+                    index % 2 === 0 ? 'md:pr-12' : 'md:pl-12'
+                  }`}
+                >
                   <TiltCard maxTilt={8} perspective={1200} scaleOnHover={1.03} className="h-full">
-                  <motion.div 
-                    data-cursor="experience-card"
-                    className="bg-black border-4 border-pale-green p-6 relative group hover:border-red-500 transition-all shadow-geometric h-full flex flex-col"
-                    whileHover={{ y: -5 }}
-                  >
-                    {/* Corner accents */}
-                    <div className="absolute top-0 right-0 w-8 h-8 bg-red-500 transform -translate-y-2 translate-x-2"></div>
-                    <div className="absolute bottom-0 left-0 w-6 h-6 bg-pale-green"></div>
+                    <motion.div
+                      data-cursor="experience-card"
+                      className="bg-black border-4 border-pale-green p-6 relative group hover:border-red-500 transition-all shadow-geometric h-full flex flex-col"
+                      whileHover={{ y: -5 }}
+                    >
+                      {/* Corner accents */}
+                      <div className="absolute top-0 right-0 w-8 h-8 bg-red-500 transform -translate-y-2 translate-x-2"></div>
+                      <div className="absolute bottom-0 left-0 w-6 h-6 bg-pale-green"></div>
 
-                    <div className="flex items-start justify-between mb-4 relative z-10">
-                      <div>
-                        <h3 className="text-2xl font-black text-white mb-2 group-hover:text-pale-green transition-colors">
-                          {job.role}
-                        </h3>
-                        <div className="flex items-center gap-2 text-red-500 font-bold mb-2">
-                          <FaBriefcase size={16} />
-                          <span>{job.company}</span>
+                      <div className="flex items-start justify-between mb-4 relative z-10">
+                        <div>
+                          <h3 className="text-2xl font-black text-white mb-2 group-hover:text-pale-green transition-colors">
+                            {job.role}
+                          </h3>
+                          <div className="flex items-center gap-2 text-red-500 font-bold mb-2">
+                            <FaBriefcase size={16} />
+                            <span>{job.company}</span>
+                          </div>
                         </div>
                       </div>
-                    </div>
 
-                    <div className="flex flex-wrap gap-4 text-sm text-gray-400 mb-4 relative z-10">
-                      <div className="flex items-center gap-2">
-                        <FaCalendar size={14} />
-                        <span className="font-semibold">{job.period}</span>
+                      <div className="flex flex-wrap gap-4 text-sm text-gray-400 mb-4 relative z-10">
+                        <div className="flex items-center gap-2">
+                          <FaCalendar size={14} />
+                          <span className="font-semibold">{job.period}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <FaMapMarkerAlt size={14} />
+                          <span className="font-semibold">{job.location}</span>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <FaMapMarkerAlt size={14} />
-                        <span className="font-semibold">{job.location}</span>
-                      </div>
-                    </div>
 
-                    <ul className="space-y-3 mb-4 relative z-10 flex-1">
-                      {job.achievements.map((achievement, idx) => (
-                        <li key={idx} className="flex items-start gap-3">
-                          <span className="flex-shrink-0 w-2 h-2 bg-red-500 rounded-none mt-1.5"></span>
-                          <span className="text-gray-300 text-sm leading-relaxed">
-                            {achievement}
+                      <ul className="space-y-3 mb-4 relative z-10 flex-1">
+                        {job.achievements.map((achievement, idx) => (
+                          <li key={idx} className="flex items-start gap-3">
+                            <span className="flex-shrink-0 w-2 h-2 bg-red-500 rounded-none mt-1.5"></span>
+                            <span className="text-gray-300 text-sm leading-relaxed">
+                              {achievement}
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+
+                      <div className="flex flex-wrap gap-2 relative z-10 mt-auto">
+                        {job.technologies.map((tech, idx) => (
+                          <span
+                            key={idx}
+                            className="px-3 py-1 bg-black text-pale-green text-xs font-bold uppercase tracking-wider border border-pale-green"
+                          >
+                            {tech}
                           </span>
-                        </li>
-                      ))}
-                    </ul>
-
-                    <div className="flex flex-wrap gap-2 relative z-10 mt-auto">
-                      {job.technologies.map((tech, idx) => (
-                        <span 
-                          key={idx}
-                          className="px-3 py-1 bg-black text-pale-green text-xs font-bold uppercase tracking-wider border border-pale-green"
-                        >
-                          {tech}
-                        </span>
-                      ))}
-                    </div>
-                  </motion.div>
+                        ))}
+                      </div>
+                    </motion.div>
                   </TiltCard>
                 </div>
               </motion.div>
